@@ -1,0 +1,10 @@
+{
+  "packs": [
+    "dave-db.json",
+    "dave-challenges.json",
+    "utt-db.json",
+    "utt-challenges.json",
+    "mega-db.json",
+    "mega-challenges.json"
+  ]
+}

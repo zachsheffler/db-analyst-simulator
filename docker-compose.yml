@@ -1,0 +1,10 @@
+services:
+  db-analyst-simulator:
+    build: .
+    image: db-analyst-simulator:latest
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    # To swap content packs without rebuilding, mount your own packs folder:
+    # volumes:
+    #   - ./public/packs:/usr/share/nginx/html/packs:ro

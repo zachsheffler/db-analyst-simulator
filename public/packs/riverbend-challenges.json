@@ -1,0 +1,2714 @@
+{
+  "format": "db-analyst-simulator/pack@1",
+  "id": "riverbend-challenges",
+  "title": "Riverbend starter challenges",
+  "description": "Sample design, query and presentation challenges. Replace or extend with packs generated from your own lectures.",
+  "design": [
+    {
+      "id": "vet-clinic",
+      "company": "riverbend",
+      "title": "Riverbend Veterinary Clinic",
+      "difficulty": 2,
+      "brief": "Riverbend Veterinary Clinic wants a database to keep track of pet owners, their pets, and clinic visits.\n\nFor each OWNER the clinic records an owner ID (unique), the owner's name, phone number, and address. The address is made up of a street, a city, and a zip code.\n\nEach owner may have many pets registered at the clinic (though a newly registered owner may not have added a pet yet). Every PET belongs to exactly one owner. For each pet the clinic records a pet ID (unique), the pet's name, its species, and its birth date. The clinic also wants to display the pet's age, which can be calculated from the birth date.\n\nA VISIT is recorded every time a pet is brought in. Each visit has a visit number (unique), a visit date, and notes. A visit is for exactly one pet, and a pet may have many visits or none at all.\n\nThe clinic employs VETERINARIANS. Each veterinarian has an employee ID (unique) and a name, and may have one or more specialties (for example, 'surgery' and 'dentistry'). Each visit is handled by exactly one veterinarian; a veterinarian handles many visits, but a newly hired veterinarian may not have handled any yet.",
+      "hints": [
+        "Four entities are named in capitals in the brief.",
+        "'Can be calculated' signals a derived attribute; 'one or more specialties' signals a multivalued attribute.",
+        "All three relationships are 1:M. Ask on each side: at most one or many? At least zero or one?"
+      ],
+      "er": {
+        "entities": [
+          {
+            "name": "OWNER",
+            "aliases": [
+              "PetOwner"
+            ],
+            "attributes": [
+              {
+                "name": "OwnerID",
+                "aliases": [
+                  "OwnerNo",
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "OwnerName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Phone",
+                "aliases": [
+                  "PhoneNumber"
+                ]
+              },
+              {
+                "name": "Address",
+                "composite": [
+                  "Street",
+                  "City",
+                  "Zip"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "PET",
+            "attributes": [
+              {
+                "name": "PetID",
+                "aliases": [
+                  "PetNo",
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "PetName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Species"
+              },
+              {
+                "name": "BirthDate",
+                "aliases": [
+                  "DOB",
+                  "DateOfBirth"
+                ]
+              },
+              {
+                "name": "Age",
+                "derived": true
+              }
+            ]
+          },
+          {
+            "name": "VISIT",
+            "attributes": [
+              {
+                "name": "VisitNo",
+                "aliases": [
+                  "VisitID",
+                  "VisitNumber",
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "VisitDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Notes",
+                "aliases": [
+                  "Note"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "VETERINARIAN",
+            "aliases": [
+              "Vet"
+            ],
+            "attributes": [
+              {
+                "name": "EmpID",
+                "aliases": [
+                  "EmployeeID",
+                  "VetID",
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "VetName",
+                "aliases": [
+                  "Name",
+                  "EmpName"
+                ]
+              },
+              {
+                "name": "Specialty",
+                "aliases": [
+                  "Specialties",
+                  "Speciality"
+                ],
+                "multivalued": true
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "name": "Owns",
+            "aliases": [
+              "Has",
+              "HasPet",
+              "OwnedBy"
+            ],
+            "sides": [
+              {
+                "entity": "OWNER",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "PET",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each pet has exactly one owner; an owner may have many pets or none."
+          },
+          {
+            "name": "BroughtFor",
+            "aliases": [
+              "Has",
+              "HasVisit",
+              "VisitedIn",
+              "IsFor"
+            ],
+            "sides": [
+              {
+                "entity": "PET",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "VISIT",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "A visit is for exactly one pet; a pet may have many visits or none."
+          },
+          {
+            "name": "Handles",
+            "aliases": [
+              "Conducts",
+              "Performs",
+              "HandledBy"
+            ],
+            "sides": [
+              {
+                "entity": "VETERINARIAN",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "VISIT",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each visit has exactly one veterinarian; a veterinarian may have handled many visits or none."
+          }
+        ]
+      },
+      "schema": {
+        "tables": [
+          {
+            "name": "OWNER",
+            "columns": [
+              {
+                "name": "OwnerID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "OwnerName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Phone"
+              },
+              {
+                "name": "Street"
+              },
+              {
+                "name": "City"
+              },
+              {
+                "name": "Zip"
+              }
+            ],
+            "pk": [
+              "OwnerID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "PET",
+            "columns": [
+              {
+                "name": "PetID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "PetName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Species"
+              },
+              {
+                "name": "BirthDate",
+                "aliases": [
+                  "DOB"
+                ]
+              },
+              {
+                "name": "OwnerID"
+              }
+            ],
+            "pk": [
+              "PetID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "OwnerID"
+                ],
+                "refTable": "OWNER"
+              }
+            ]
+          },
+          {
+            "name": "VISIT",
+            "columns": [
+              {
+                "name": "VisitNo",
+                "aliases": [
+                  "VisitID",
+                  "ID"
+                ]
+              },
+              {
+                "name": "VisitDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Notes"
+              },
+              {
+                "name": "PetID"
+              },
+              {
+                "name": "EmpID",
+                "aliases": [
+                  "VetID",
+                  "VeterinarianID"
+                ]
+              }
+            ],
+            "pk": [
+              "VisitNo"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "PetID"
+                ],
+                "refTable": "PET"
+              },
+              {
+                "columns": [
+                  "EmpID"
+                ],
+                "refTable": "VETERINARIAN"
+              }
+            ]
+          },
+          {
+            "name": "VETERINARIAN",
+            "aliases": [
+              "Vet"
+            ],
+            "columns": [
+              {
+                "name": "EmpID",
+                "aliases": [
+                  "VetID",
+                  "ID",
+                  "EmployeeID"
+                ]
+              },
+              {
+                "name": "VetName",
+                "aliases": [
+                  "Name"
+                ]
+              }
+            ],
+            "pk": [
+              "EmpID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "VET_SPECIALTY",
+            "aliases": [
+              "Specialty",
+              "VeterinarianSpecialty",
+              "VetSpecialties"
+            ],
+            "note": "The multivalued attribute Specialty must become its own table (EmpID + Specialty).",
+            "columns": [
+              {
+                "name": "EmpID",
+                "aliases": [
+                  "VetID"
+                ]
+              },
+              {
+                "name": "Specialty",
+                "aliases": [
+                  "SpecialtyName"
+                ]
+              }
+            ],
+            "pk": [
+              "EmpID",
+              "Specialty"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "EmpID"
+                ],
+                "refTable": "VETERINARIAN"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "Age is derived, so it is not stored. The composite Address becomes Street, City, Zip."
+        ]
+      },
+      "ddl": {
+        "tests": [
+          {
+            "description": "Inserting an owner works.",
+            "sql": "INSERT INTO OWNER (OwnerID, OwnerName, Phone, Street, City, Zip) VALUES (1, 'Dana Reyes', '555-0100', '12 Elm St', 'Portland', '97209')",
+            "expect": "ok"
+          },
+          {
+            "description": "Inserting a pet for an existing owner works.",
+            "sql": "INSERT INTO PET (PetID, PetName, Species, BirthDate, OwnerID) VALUES (10, 'Biscuit', 'Dog', '2021-04-02', 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "A pet with a non-existent owner is rejected (foreign key).",
+            "sql": "INSERT INTO PET (PetID, PetName, Species, BirthDate, OwnerID) VALUES (11, 'Ghost', 'Cat', '2020-01-01', 999)",
+            "expect": "error"
+          },
+          {
+            "description": "A duplicate owner ID is rejected (primary key).",
+            "sql": "INSERT INTO OWNER (OwnerID, OwnerName, Phone, Street, City, Zip) VALUES (1, 'Someone Else', '555-0199', '1 A St', 'Boise', '83702')",
+            "expect": "error"
+          },
+          {
+            "description": "Inserting a veterinarian and a specialty works.",
+            "sql": "INSERT INTO VETERINARIAN (EmpID, VetName) VALUES (7, 'Dr. Osei'); INSERT INTO VET_SPECIALTY (EmpID, Specialty) VALUES (7, 'Surgery')",
+            "expect": "ok"
+          },
+          {
+            "description": "A specialty for a non-existent veterinarian is rejected.",
+            "sql": "INSERT INTO VET_SPECIALTY (EmpID, Specialty) VALUES (99, 'Dentistry')",
+            "expect": "error"
+          },
+          {
+            "description": "A visit for an existing pet and vet works.",
+            "sql": "INSERT INTO VISIT (VisitNo, VisitDate, Notes, PetID, EmpID) VALUES (100, '2025-03-01', 'Checkup', 10, 7)",
+            "expect": "ok"
+          }
+        ]
+      }
+    },
+    {
+      "id": "campus-events",
+      "company": "riverbend",
+      "title": "Campus Events Office",
+      "difficulty": 3,
+      "brief": "The Campus Events Office needs a database for student organizations and the events they run.\n\nEach STUDENT has a student ID (unique), a name, an email address, and a major.\n\nEach ORGANIZATION has an org ID (unique), a name, and a type (academic, social, service, ...). Every organization has exactly one president, who is a student; a student can be president of at most one organization, and most students are not presidents of anything.\n\nStudents join organizations: a student can be a member of many organizations or none, and an organization can have many student members (a brand-new organization may have none yet).\n\nEach EVENT has an event ID (unique), a title, a date, and a capacity. Every event is sponsored by exactly one organization; an organization may sponsor many events or none.\n\nEach event takes place at exactly one VENUE. A venue has a venue ID (unique), a name, and a building. A venue may host many events over time or none.\n\nStudents register for events. A student may register for many events (or none), and an event may have many registered students (or none). For each registration the office records the registration date and whether the student actually attended.",
+      "hints": [
+        "There are two M:N relationships and one of them carries attributes.",
+        "'Exactly one president ... at most one organization' describes a 1:1 relationship with different participation on each side.",
+        "In the relational schema, a 1:1 relationship becomes a foreign key on one side. Which side has mandatory participation?"
+      ],
+      "er": {
+        "entities": [
+          {
+            "name": "STUDENT",
+            "attributes": [
+              {
+                "name": "StudentID",
+                "aliases": [
+                  "ID",
+                  "SID"
+                ],
+                "key": true
+              },
+              {
+                "name": "StudentName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Email",
+                "aliases": [
+                  "EmailAddress"
+                ]
+              },
+              {
+                "name": "Major"
+              }
+            ]
+          },
+          {
+            "name": "ORGANIZATION",
+            "aliases": [
+              "Org",
+              "StudentOrganization",
+              "Club"
+            ],
+            "attributes": [
+              {
+                "name": "OrgID",
+                "aliases": [
+                  "OrganizationID",
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "OrgName",
+                "aliases": [
+                  "Name",
+                  "OrganizationName"
+                ]
+              },
+              {
+                "name": "OrgType",
+                "aliases": [
+                  "Type"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "EVENT",
+            "attributes": [
+              {
+                "name": "EventID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "EventTitle",
+                  "Name",
+                  "EventName"
+                ]
+              },
+              {
+                "name": "EventDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Capacity"
+              }
+            ]
+          },
+          {
+            "name": "VENUE",
+            "attributes": [
+              {
+                "name": "VenueID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "VenueName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Building"
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "name": "Presides",
+            "aliases": [
+              "PresidentOf",
+              "IsPresidentOf",
+              "Leads",
+              "HasPresident"
+            ],
+            "sides": [
+              {
+                "entity": "STUDENT",
+                "max": "1",
+                "min": "optional"
+              },
+              {
+                "entity": "ORGANIZATION",
+                "max": "1",
+                "min": "mandatory"
+              }
+            ],
+            "rationale": "Every organization has exactly one president (mandatory, 1); a student presides over at most one organization (optional, 1)."
+          },
+          {
+            "name": "MemberOf",
+            "aliases": [
+              "Joins",
+              "BelongsTo",
+              "Membership",
+              "HasMember"
+            ],
+            "sides": [
+              {
+                "entity": "STUDENT",
+                "max": "M",
+                "min": "optional"
+              },
+              {
+                "entity": "ORGANIZATION",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Many-to-many, optional on both sides."
+          },
+          {
+            "name": "Sponsors",
+            "aliases": [
+              "Runs",
+              "Hosts",
+              "Organizes",
+              "SponsoredBy"
+            ],
+            "sides": [
+              {
+                "entity": "ORGANIZATION",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "EVENT",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each event has exactly one sponsoring organization; an organization sponsors many events or none."
+          },
+          {
+            "name": "HeldAt",
+            "aliases": [
+              "TakesPlaceAt",
+              "Hosts",
+              "LocatedAt",
+              "At"
+            ],
+            "sides": [
+              {
+                "entity": "VENUE",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "EVENT",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each event is at exactly one venue; a venue hosts many events or none."
+          },
+          {
+            "name": "RegistersFor",
+            "aliases": [
+              "Registers",
+              "Registration",
+              "Attends",
+              "SignsUpFor"
+            ],
+            "sides": [
+              {
+                "entity": "STUDENT",
+                "max": "M",
+                "min": "optional"
+              },
+              {
+                "entity": "EVENT",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "attributes": [
+              {
+                "name": "RegDate",
+                "aliases": [
+                  "RegistrationDate",
+                  "Date"
+                ]
+              },
+              {
+                "name": "Attended",
+                "aliases": [
+                  "DidAttend",
+                  "Attendance"
+                ]
+              }
+            ],
+            "rationale": "Many-to-many with attributes; the attributes belong to the relationship."
+          }
+        ]
+      },
+      "schema": {
+        "tables": [
+          {
+            "name": "STUDENT",
+            "columns": [
+              {
+                "name": "StudentID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "StudentName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Email"
+              },
+              {
+                "name": "Major"
+              }
+            ],
+            "pk": [
+              "StudentID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "ORGANIZATION",
+            "aliases": [
+              "Org",
+              "Club"
+            ],
+            "columns": [
+              {
+                "name": "OrgID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "OrgName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "OrgType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "PresidentID",
+                "aliases": [
+                  "President",
+                  "StudentID",
+                  "PresidentStudentID"
+                ]
+              }
+            ],
+            "pk": [
+              "OrgID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "PresidentID"
+                ],
+                "refTable": "STUDENT"
+              }
+            ]
+          },
+          {
+            "name": "VENUE",
+            "columns": [
+              {
+                "name": "VenueID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "VenueName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Building"
+              }
+            ],
+            "pk": [
+              "VenueID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "EVENT",
+            "columns": [
+              {
+                "name": "EventID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "Name",
+                  "EventName"
+                ]
+              },
+              {
+                "name": "EventDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Capacity"
+              },
+              {
+                "name": "OrgID",
+                "aliases": [
+                  "OrganizationID",
+                  "SponsorID"
+                ]
+              },
+              {
+                "name": "VenueID"
+              }
+            ],
+            "pk": [
+              "EventID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "OrgID"
+                ],
+                "refTable": "ORGANIZATION"
+              },
+              {
+                "columns": [
+                  "VenueID"
+                ],
+                "refTable": "VENUE"
+              }
+            ]
+          },
+          {
+            "name": "MEMBERSHIP",
+            "aliases": [
+              "MemberOf",
+              "StudentOrganization",
+              "Member",
+              "OrgMember"
+            ],
+            "note": "The M:N MemberOf relationship needs a bridge table.",
+            "columns": [
+              {
+                "name": "StudentID"
+              },
+              {
+                "name": "OrgID",
+                "aliases": [
+                  "OrganizationID"
+                ]
+              }
+            ],
+            "pk": [
+              "StudentID",
+              "OrgID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "StudentID"
+                ],
+                "refTable": "STUDENT"
+              },
+              {
+                "columns": [
+                  "OrgID"
+                ],
+                "refTable": "ORGANIZATION"
+              }
+            ]
+          },
+          {
+            "name": "REGISTRATION",
+            "aliases": [
+              "RegistersFor",
+              "EventRegistration",
+              "Registers",
+              "StudentEvent"
+            ],
+            "note": "The M:N RegistersFor relationship needs a bridge table that also holds RegDate and Attended.",
+            "columns": [
+              {
+                "name": "StudentID"
+              },
+              {
+                "name": "EventID"
+              },
+              {
+                "name": "RegDate",
+                "aliases": [
+                  "RegistrationDate",
+                  "Date"
+                ]
+              },
+              {
+                "name": "Attended",
+                "aliases": [
+                  "DidAttend"
+                ]
+              }
+            ],
+            "pk": [
+              "StudentID",
+              "EventID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "StudentID"
+                ],
+                "refTable": "STUDENT"
+              },
+              {
+                "columns": [
+                  "EventID"
+                ],
+                "refTable": "EVENT"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "For the 1:1 Presides relationship, the foreign key belongs on ORGANIZATION (mandatory side): every organization has a president, but most students do not preside over anything, so a PresidentOf column in STUDENT would be mostly NULL."
+        ],
+        "alternates": [
+          {
+            "tables": [
+              {
+                "name": "STUDENT",
+                "columns": [
+                  {
+                    "name": "StudentID",
+                    "aliases": [
+                      "ID"
+                    ]
+                  },
+                  {
+                    "name": "StudentName",
+                    "aliases": [
+                      "Name"
+                    ]
+                  },
+                  {
+                    "name": "Email"
+                  },
+                  {
+                    "name": "Major"
+                  },
+                  {
+                    "name": "PresidentOfOrgID",
+                    "aliases": [
+                      "OrgID",
+                      "PresidentOf",
+                      "PresidesOrgID"
+                    ]
+                  }
+                ],
+                "pk": [
+                  "StudentID"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "PresidentOfOrgID"
+                    ],
+                    "refTable": "ORGANIZATION"
+                  }
+                ]
+              },
+              {
+                "name": "ORGANIZATION",
+                "aliases": [
+                  "Org",
+                  "Club"
+                ],
+                "columns": [
+                  {
+                    "name": "OrgID",
+                    "aliases": [
+                      "ID"
+                    ]
+                  },
+                  {
+                    "name": "OrgName",
+                    "aliases": [
+                      "Name"
+                    ]
+                  },
+                  {
+                    "name": "OrgType",
+                    "aliases": [
+                      "Type"
+                    ]
+                  }
+                ],
+                "pk": [
+                  "OrgID"
+                ],
+                "fks": []
+              },
+              {
+                "name": "VENUE",
+                "columns": [
+                  {
+                    "name": "VenueID",
+                    "aliases": [
+                      "ID"
+                    ]
+                  },
+                  {
+                    "name": "VenueName",
+                    "aliases": [
+                      "Name"
+                    ]
+                  },
+                  {
+                    "name": "Building"
+                  }
+                ],
+                "pk": [
+                  "VenueID"
+                ],
+                "fks": []
+              },
+              {
+                "name": "EVENT",
+                "columns": [
+                  {
+                    "name": "EventID",
+                    "aliases": [
+                      "ID"
+                    ]
+                  },
+                  {
+                    "name": "Title",
+                    "aliases": [
+                      "Name",
+                      "EventName"
+                    ]
+                  },
+                  {
+                    "name": "EventDate",
+                    "aliases": [
+                      "Date"
+                    ]
+                  },
+                  {
+                    "name": "Capacity"
+                  },
+                  {
+                    "name": "OrgID",
+                    "aliases": [
+                      "OrganizationID",
+                      "SponsorID"
+                    ]
+                  },
+                  {
+                    "name": "VenueID"
+                  }
+                ],
+                "pk": [
+                  "EventID"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "OrgID"
+                    ],
+                    "refTable": "ORGANIZATION"
+                  },
+                  {
+                    "columns": [
+                      "VenueID"
+                    ],
+                    "refTable": "VENUE"
+                  }
+                ]
+              },
+              {
+                "name": "MEMBERSHIP",
+                "aliases": [
+                  "MemberOf",
+                  "StudentOrganization",
+                  "Member",
+                  "OrgMember"
+                ],
+                "columns": [
+                  {
+                    "name": "StudentID"
+                  },
+                  {
+                    "name": "OrgID",
+                    "aliases": [
+                      "OrganizationID"
+                    ]
+                  }
+                ],
+                "pk": [
+                  "StudentID",
+                  "OrgID"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "StudentID"
+                    ],
+                    "refTable": "STUDENT"
+                  },
+                  {
+                    "columns": [
+                      "OrgID"
+                    ],
+                    "refTable": "ORGANIZATION"
+                  }
+                ]
+              },
+              {
+                "name": "REGISTRATION",
+                "aliases": [
+                  "RegistersFor",
+                  "EventRegistration",
+                  "Registers",
+                  "StudentEvent"
+                ],
+                "columns": [
+                  {
+                    "name": "StudentID"
+                  },
+                  {
+                    "name": "EventID"
+                  },
+                  {
+                    "name": "RegDate",
+                    "aliases": [
+                      "RegistrationDate",
+                      "Date"
+                    ]
+                  },
+                  {
+                    "name": "Attended",
+                    "aliases": [
+                      "DidAttend"
+                    ]
+                  }
+                ],
+                "pk": [
+                  "StudentID",
+                  "EventID"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "StudentID"
+                    ],
+                    "refTable": "STUDENT"
+                  },
+                  {
+                    "columns": [
+                      "EventID"
+                    ],
+                    "refTable": "EVENT"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ddl": {
+        "tests": [
+          {
+            "description": "Inserting a student works.",
+            "sql": "INSERT INTO STUDENT (StudentID, StudentName, Email, Major) VALUES (1, 'Priya Iyer', 'p@u.edu', 'CS')",
+            "expect": "ok"
+          },
+          {
+            "description": "Inserting an organization with an existing president works.",
+            "sql": "INSERT INTO ORGANIZATION (OrgID, OrgName, OrgType, PresidentID) VALUES (1, 'Data Club', 'academic', 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "Inserting a venue and an event works.",
+            "sql": "INSERT INTO VENUE (VenueID, VenueName, Building) VALUES (1, 'Room 101', 'Science Hall'); INSERT INTO EVENT (EventID, Title, EventDate, Capacity, OrgID, VenueID) VALUES (1, 'SQL Night', '2025-10-01', 40, 1, 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "An event at a non-existent venue is rejected.",
+            "sql": "INSERT INTO EVENT (EventID, Title, EventDate, Capacity, OrgID, VenueID) VALUES (2, 'Ghost Event', '2025-10-02', 10, 1, 99)",
+            "expect": "error"
+          },
+          {
+            "description": "A registration works.",
+            "sql": "INSERT INTO REGISTRATION (StudentID, EventID, RegDate, Attended) VALUES (1, 1, '2025-09-20', 'Y')",
+            "expect": "ok"
+          },
+          {
+            "description": "The same student cannot register twice for the same event (composite PK).",
+            "sql": "INSERT INTO REGISTRATION (StudentID, EventID, RegDate, Attended) VALUES (1, 1, '2025-09-21', 'N')",
+            "expect": "error"
+          },
+          {
+            "description": "A membership for a non-existent organization is rejected.",
+            "sql": "INSERT INTO MEMBERSHIP (StudentID, OrgID) VALUES (1, 42)",
+            "expect": "error"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bike-rentals",
+      "company": "riverbend",
+      "title": "Riverbend Rentals",
+      "difficulty": 4,
+      "brief": "Riverbend Cycles is launching a bike rental service and needs a database.\n\nEach rental BIKE has a bike ID (unique), a model, a type (road, trail, e-bike, ...), and an hourly rate.\n\nA CUSTOMER has a customer ID (unique), a name, an email address, and one or more phone numbers.\n\nRental STATIONS have a station ID (unique), a station name, and a location consisting of a street and a city.\n\nA RENTAL has a rental ID (unique), a start time, an end time, and a total cost that is computed from the duration and the bike's hourly rate. Every rental is made by exactly one customer and involves exactly one bike; customers and bikes may have many rentals or none. Every rental is picked up at exactly one station. A rental may be returned to a station (any station), but an in-progress rental has no return station yet. A station may be the pick-up point for many rentals and the return point for many rentals.\n\nMaintenance work on bikes must be logged. Each MAINTENANCE LOG entry has a log number, a date, and a description. Log numbers restart at 1 for each bike, so a log entry can only be identified together with its bike. Each log entry belongs to exactly one bike; a bike may have many log entries or none.\n\nEach EMPLOYEE has an employee ID (unique) and a name, works at exactly one station, and may supervise other employees. Each employee has at most one supervisor, and some employees (managers) have none. A station has many employees or none (a station being set up).",
+      "hints": [
+        "'Can only be identified together with its bike' is the definition of a weak entity with a partial key and an identifying relationship.",
+        "Two different relationships connect STATION and RENTAL (pick-up and return). Give them different names.",
+        "'May supervise other employees' is a unary (recursive) 1:M relationship on EMPLOYEE.",
+        "In the schema, RENTAL needs two foreign keys to STATION with different column names."
+      ],
+      "er": {
+        "entities": [
+          {
+            "name": "BIKE",
+            "attributes": [
+              {
+                "name": "BikeID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "Model"
+              },
+              {
+                "name": "BikeType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "HourlyRate",
+                "aliases": [
+                  "Rate"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "CUSTOMER",
+            "attributes": [
+              {
+                "name": "CustomerID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "CustName",
+                "aliases": [
+                  "Name",
+                  "CustomerName"
+                ]
+              },
+              {
+                "name": "Email"
+              },
+              {
+                "name": "Phone",
+                "aliases": [
+                  "PhoneNumber",
+                  "PhoneNumbers"
+                ],
+                "multivalued": true
+              }
+            ]
+          },
+          {
+            "name": "STATION",
+            "aliases": [
+              "RentalStation"
+            ],
+            "attributes": [
+              {
+                "name": "StationID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "StationName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Location",
+                "aliases": [
+                  "Address"
+                ],
+                "composite": [
+                  "Street",
+                  "City"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "RENTAL",
+            "attributes": [
+              {
+                "name": "RentalID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "StartTime",
+                "aliases": [
+                  "Start"
+                ]
+              },
+              {
+                "name": "EndTime",
+                "aliases": [
+                  "End"
+                ]
+              },
+              {
+                "name": "TotalCost",
+                "aliases": [
+                  "Cost",
+                  "Total"
+                ],
+                "derived": true
+              }
+            ]
+          },
+          {
+            "name": "MAINTENANCE_LOG",
+            "aliases": [
+              "MaintenanceLog",
+              "Maintenance",
+              "LogEntry",
+              "Log"
+            ],
+            "weak": true,
+            "attributes": [
+              {
+                "name": "LogNo",
+                "aliases": [
+                  "LogNumber",
+                  "LogID",
+                  "EntryNo"
+                ],
+                "partialKey": true
+              },
+              {
+                "name": "LogDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Description",
+                "aliases": [
+                  "Desc"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "EMPLOYEE",
+            "attributes": [
+              {
+                "name": "EmpID",
+                "aliases": [
+                  "EmployeeID",
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "EmpName",
+                "aliases": [
+                  "Name",
+                  "EmployeeName"
+                ]
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "name": "Rents",
+            "aliases": [
+              "Makes",
+              "RentedBy",
+              "Has"
+            ],
+            "sides": [
+              {
+                "entity": "CUSTOMER",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "RENTAL",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Every rental is by exactly one customer; a customer may have many rentals or none."
+          },
+          {
+            "name": "Involves",
+            "aliases": [
+              "Uses",
+              "RentedIn",
+              "IsRented"
+            ],
+            "sides": [
+              {
+                "entity": "BIKE",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "RENTAL",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Every rental involves exactly one bike; a bike may be in many rentals or none."
+          },
+          {
+            "name": "PickedUpAt",
+            "aliases": [
+              "PickUp",
+              "Pickup",
+              "StartsAt"
+            ],
+            "sides": [
+              {
+                "entity": "STATION",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "RENTAL",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Every rental has exactly one pick-up station."
+          },
+          {
+            "name": "ReturnedTo",
+            "aliases": [
+              "Return",
+              "Returns",
+              "EndsAt",
+              "DropOff"
+            ],
+            "sides": [
+              {
+                "entity": "STATION",
+                "max": "1",
+                "min": "optional"
+              },
+              {
+                "entity": "RENTAL",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "A rental has at most one return station, and none while in progress: optional on the station side."
+          },
+          {
+            "name": "Has",
+            "aliases": [
+              "Logs",
+              "HasLog",
+              "MaintainedIn",
+              "Includes"
+            ],
+            "identifying": true,
+            "sides": [
+              {
+                "entity": "BIKE",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "MAINTENANCE_LOG",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Identifying relationship: every log entry belongs to exactly one bike."
+          },
+          {
+            "name": "WorksAt",
+            "aliases": [
+              "Employs",
+              "AssignedTo",
+              "Staffs"
+            ],
+            "sides": [
+              {
+                "entity": "STATION",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "EMPLOYEE",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each employee works at exactly one station; a station has many employees or none."
+          },
+          {
+            "name": "Supervises",
+            "aliases": [
+              "Manages",
+              "ReportsTo",
+              "SupervisedBy"
+            ],
+            "sides": [
+              {
+                "entity": "EMPLOYEE",
+                "max": "1",
+                "min": "optional",
+                "role": "supervisor"
+              },
+              {
+                "entity": "EMPLOYEE",
+                "max": "M",
+                "min": "optional",
+                "role": "subordinate"
+              }
+            ],
+            "rationale": "Unary 1:M: an employee has at most one supervisor (optional); a supervisor may supervise many employees."
+          }
+        ]
+      },
+      "schema": {
+        "tables": [
+          {
+            "name": "BIKE",
+            "columns": [
+              {
+                "name": "BikeID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "Model"
+              },
+              {
+                "name": "BikeType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "HourlyRate",
+                "aliases": [
+                  "Rate"
+                ]
+              }
+            ],
+            "pk": [
+              "BikeID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "CUSTOMER",
+            "columns": [
+              {
+                "name": "CustomerID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "CustName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Email"
+              }
+            ],
+            "pk": [
+              "CustomerID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "CUSTOMER_PHONE",
+            "aliases": [
+              "CustomerPhone",
+              "Phone",
+              "CustPhone",
+              "PhoneNumber"
+            ],
+            "note": "The multivalued Phone attribute becomes its own table.",
+            "columns": [
+              {
+                "name": "CustomerID"
+              },
+              {
+                "name": "Phone",
+                "aliases": [
+                  "PhoneNumber"
+                ]
+              }
+            ],
+            "pk": [
+              "CustomerID",
+              "Phone"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "CustomerID"
+                ],
+                "refTable": "CUSTOMER"
+              }
+            ]
+          },
+          {
+            "name": "STATION",
+            "columns": [
+              {
+                "name": "StationID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "StationName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Street"
+              },
+              {
+                "name": "City"
+              }
+            ],
+            "pk": [
+              "StationID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "RENTAL",
+            "columns": [
+              {
+                "name": "RentalID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "StartTime",
+                "aliases": [
+                  "Start"
+                ]
+              },
+              {
+                "name": "EndTime",
+                "aliases": [
+                  "End"
+                ],
+                "nullable": true
+              },
+              {
+                "name": "CustomerID"
+              },
+              {
+                "name": "BikeID"
+              },
+              {
+                "name": "PickupStationID",
+                "aliases": [
+                  "PickupStation",
+                  "PickUpStationID",
+                  "StartStationID",
+                  "PickupID"
+                ]
+              },
+              {
+                "name": "ReturnStationID",
+                "aliases": [
+                  "ReturnStation",
+                  "EndStationID",
+                  "DropoffStationID",
+                  "ReturnID"
+                ],
+                "nullable": true
+              }
+            ],
+            "pk": [
+              "RentalID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "CustomerID"
+                ],
+                "refTable": "CUSTOMER"
+              },
+              {
+                "columns": [
+                  "BikeID"
+                ],
+                "refTable": "BIKE"
+              },
+              {
+                "columns": [
+                  "PickupStationID"
+                ],
+                "refTable": "STATION"
+              },
+              {
+                "columns": [
+                  "ReturnStationID"
+                ],
+                "refTable": "STATION"
+              }
+            ]
+          },
+          {
+            "name": "MAINTENANCE_LOG",
+            "aliases": [
+              "MaintenanceLog",
+              "Maintenance",
+              "LogEntry",
+              "Log"
+            ],
+            "note": "Weak entity: its PK is the owner's key plus the partial key.",
+            "columns": [
+              {
+                "name": "BikeID"
+              },
+              {
+                "name": "LogNo",
+                "aliases": [
+                  "LogNumber",
+                  "LogID"
+                ]
+              },
+              {
+                "name": "LogDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Description"
+              }
+            ],
+            "pk": [
+              "BikeID",
+              "LogNo"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "BikeID"
+                ],
+                "refTable": "BIKE"
+              }
+            ]
+          },
+          {
+            "name": "EMPLOYEE",
+            "columns": [
+              {
+                "name": "EmpID",
+                "aliases": [
+                  "EmployeeID",
+                  "ID"
+                ]
+              },
+              {
+                "name": "EmpName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "StationID"
+              },
+              {
+                "name": "SupervisorID",
+                "aliases": [
+                  "Supervisor",
+                  "ManagerID",
+                  "SupervisorEmpID"
+                ],
+                "nullable": true
+              }
+            ],
+            "pk": [
+              "EmpID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "StationID"
+                ],
+                "refTable": "STATION"
+              },
+              {
+                "columns": [
+                  "SupervisorID"
+                ],
+                "refTable": "EMPLOYEE"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "TotalCost is derived and not stored.",
+          "ReturnStationID and SupervisorID must allow NULL."
+        ]
+      },
+      "ddl": {
+        "tests": [
+          {
+            "description": "Base rows insert cleanly.",
+            "sql": "INSERT INTO STATION (StationID, StationName, Street, City) VALUES (1, 'Waterfront', '1 River Rd', 'Portland'); INSERT INTO BIKE (BikeID, Model, BikeType, HourlyRate) VALUES (1, 'Fjord', 'commuter', 9.5); INSERT INTO CUSTOMER (CustomerID, CustName, Email) VALUES (1, 'Kai Osei', 'kai@x.com')",
+            "expect": "ok"
+          },
+          {
+            "description": "A rental with no return station yet is allowed (NULL).",
+            "sql": "INSERT INTO RENTAL (RentalID, StartTime, EndTime, CustomerID, BikeID, PickupStationID, ReturnStationID) VALUES (1, '2025-06-01 09:00', NULL, 1, 1, 1, NULL)",
+            "expect": "ok"
+          },
+          {
+            "description": "A rental picked up at a non-existent station is rejected.",
+            "sql": "INSERT INTO RENTAL (RentalID, StartTime, EndTime, CustomerID, BikeID, PickupStationID, ReturnStationID) VALUES (2, '2025-06-01 09:00', NULL, 1, 1, 99, NULL)",
+            "expect": "error"
+          },
+          {
+            "description": "Two log entries numbered 1 for different bikes are fine.",
+            "sql": "INSERT INTO BIKE (BikeID, Model, BikeType, HourlyRate) VALUES (2, 'Ridge', 'trail', 12); INSERT INTO MAINTENANCE_LOG (BikeID, LogNo, LogDate, Description) VALUES (1, 1, '2025-05-01', 'Tune-up'); INSERT INTO MAINTENANCE_LOG (BikeID, LogNo, LogDate, Description) VALUES (2, 1, '2025-05-02', 'Brakes')",
+            "expect": "ok"
+          },
+          {
+            "description": "A duplicate log number for the same bike is rejected.",
+            "sql": "INSERT INTO MAINTENANCE_LOG (BikeID, LogNo, LogDate, Description) VALUES (1, 1, '2025-05-03', 'Again')",
+            "expect": "error"
+          },
+          {
+            "description": "A manager with no supervisor, then an employee reporting to them.",
+            "sql": "INSERT INTO EMPLOYEE (EmpID, EmpName, StationID, SupervisorID) VALUES (1, 'Nora', 1, NULL); INSERT INTO EMPLOYEE (EmpID, EmpName, StationID, SupervisorID) VALUES (2, 'Theo', 1, 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "An employee whose supervisor does not exist is rejected.",
+            "sql": "INSERT INTO EMPLOYEE (EmpID, EmpName, StationID, SupervisorID) VALUES (3, 'Ghost', 1, 42)",
+            "expect": "error"
+          },
+          {
+            "description": "A second phone number for the same customer is allowed.",
+            "sql": "INSERT INTO CUSTOMER_PHONE (CustomerID, Phone) VALUES (1, '555-0101'); INSERT INTO CUSTOMER_PHONE (CustomerID, Phone) VALUES (1, '555-0102')",
+            "expect": "ok"
+          }
+        ]
+      }
+    }
+  ],
+  "queries": [
+    {
+      "id": "riverbend-sql",
+      "company": "riverbend",
+      "title": "Riverbend Cycles \u2014 SQL sprint",
+      "database": "riverbend",
+      "questions": [
+        {
+          "id": "q01",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "List the name and price of every product.",
+          "sql": "SELECT ProductName, Price FROM Product"
+        },
+        {
+          "id": "q02",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "Show every column of every store.",
+          "sql": "SELECT * FROM Store"
+        },
+        {
+          "id": "q03",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "List the first name, last name, and city of every customer.",
+          "sql": "SELECT FirstName, LastName, City FROM Customer"
+        },
+        {
+          "id": "q04",
+          "topic": "select-where",
+          "difficulty": 1,
+          "text": "List the names of products priced above ${{price}}.",
+          "sql": "SELECT ProductName FROM Product WHERE Price > {{price}}",
+          "params": {
+            "price": {
+              "values": [
+                30,
+                50,
+                100,
+                200,
+                500
+              ]
+            }
+          }
+        },
+        {
+          "id": "q05",
+          "topic": "select-where",
+          "difficulty": 1,
+          "text": "List the first and last names of customers who live in the state {{state}}.",
+          "sql": "SELECT FirstName, LastName FROM Customer WHERE State = '{{state}}'",
+          "params": {
+            "state": {
+              "from": "SELECT DISTINCT State FROM Customer"
+            }
+          }
+        },
+        {
+          "id": "q06",
+          "topic": "select-where",
+          "difficulty": 2,
+          "text": "List the product ID and name of products in category {{cat}} that cost less than ${{price}}.",
+          "sql": "SELECT ProductID, ProductName FROM Product WHERE CategoryID = '{{cat}}' AND Price < {{price}}",
+          "params": {
+            "cat": {
+              "from": "SELECT CategoryID FROM Category"
+            },
+            "price": {
+              "values": [
+                40,
+                60,
+                100
+              ]
+            }
+          },
+          "hints": [
+            "Combine two conditions with AND."
+          ]
+        },
+        {
+          "id": "q07",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List the distinct cities where customers live, in alphabetical order.",
+          "sql": "SELECT DISTINCT City FROM Customer ORDER BY City",
+          "orderMatters": true,
+          "hints": [
+            "DISTINCT removes duplicate rows; ORDER BY sorts."
+          ]
+        },
+        {
+          "id": "q08",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List every product name and price, most expensive first.",
+          "sql": "SELECT ProductName, Price FROM Product ORDER BY Price DESC",
+          "orderMatters": true
+        },
+        {
+          "id": "q09",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List the distinct states in which the company has customers.",
+          "sql": "SELECT DISTINCT State FROM Customer"
+        },
+        {
+          "id": "q10",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the names and prices of products whose name contains the word '{{word}}'.",
+          "sql": "SELECT ProductName, Price FROM Product WHERE ProductName LIKE '%{{word}}%'",
+          "params": {
+            "word": {
+              "values": [
+                "Bike",
+                "Helmet",
+                "Light",
+                "Lock",
+                "Tire",
+                "Alpen"
+              ]
+            }
+          },
+          "hints": [
+            "LIKE with % wildcards on both sides."
+          ]
+        },
+        {
+          "id": "q11",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the transaction ID and date of all transactions that took place in {{month}} (given as YYYY-MM).",
+          "sql": "SELECT TID, TDate FROM SalesTransaction WHERE TMonth = '{{month}}'",
+          "params": {
+            "month": {
+              "from": "SELECT DISTINCT TMonth FROM SalesTransaction"
+            }
+          },
+          "hints": [
+            "TMonth stores the month as text, or use LIKE on TDate."
+          ]
+        },
+        {
+          "id": "q12",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the names of products priced between ${{lo}} and ${{hi}} inclusive.",
+          "sql": "SELECT ProductName FROM Product WHERE Price BETWEEN {{lo}} AND {{hi}}",
+          "params": {
+            "lo": {
+              "values": [
+                20,
+                25,
+                30
+              ]
+            },
+            "hi": {
+              "values": [
+                60,
+                90,
+                150
+              ]
+            }
+          }
+        },
+        {
+          "id": "q13",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the last names and states of customers who live in either {{s1}} or {{s2}}.",
+          "sql": "SELECT LastName, State FROM Customer WHERE State IN ('{{s1}}', '{{s2}}')",
+          "params": {
+            "s1": {
+              "values": [
+                "OR",
+                "WI"
+              ]
+            },
+            "s2": {
+              "values": [
+                "OH",
+                "ID",
+                "WA"
+              ]
+            }
+          }
+        },
+        {
+          "id": "q14",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "How many products are in the catalog? Return a single number.",
+          "sql": "SELECT COUNT(*) FROM Product"
+        },
+        {
+          "id": "q15",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "What are the highest and the lowest product prices? Return both in one row.",
+          "sql": "SELECT MAX(Price), MIN(Price) FROM Product"
+        },
+        {
+          "id": "q16",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "What is the average price of the products supplied by vendor {{vid}}? Round to 2 decimals.",
+          "sql": "SELECT ROUND(AVG(Price), 2) FROM Product WHERE VendorID = '{{vid}}'",
+          "params": {
+            "vid": {
+              "from": "SELECT VendorID FROM Vendor"
+            }
+          }
+        },
+        {
+          "id": "q17",
+          "topic": "aggregate",
+          "difficulty": 3,
+          "text": "What is the total quantity of product {{pid}} ever sold? Return a single number.",
+          "sql": "SELECT SUM(Quantity) FROM SoldVia WHERE ProductID = '{{pid}}'",
+          "params": {
+            "pid": {
+              "from": "SELECT DISTINCT ProductID FROM SoldVia"
+            }
+          }
+        },
+        {
+          "id": "q18",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each category ID, show the category ID and the number of products in it.",
+          "sql": "SELECT CategoryID, COUNT(*) FROM Product GROUP BY CategoryID"
+        },
+        {
+          "id": "q19",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each store ID, show the store ID and the number of transactions made there (only stores with transactions).",
+          "sql": "SELECT StoreID, COUNT(*) FROM SalesTransaction GROUP BY StoreID"
+        },
+        {
+          "id": "q20",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each product ID, show the product ID and the total quantity sold.",
+          "sql": "SELECT ProductID, SUM(Quantity) FROM SoldVia GROUP BY ProductID"
+        },
+        {
+          "id": "q21",
+          "topic": "group-by",
+          "difficulty": 4,
+          "text": "Show total revenue per month: the month (YYYY-MM) and the sum of LineTotal, sorted chronologically.",
+          "sql": "SELECT TMonth, SUM(LineTotal) FROM SalesTransaction T JOIN SoldVia S ON T.TID = S.TID GROUP BY TMonth ORDER BY TMonth",
+          "orderMatters": true,
+          "hints": [
+            "Join SalesTransaction to SoldVia, group by TMonth."
+          ]
+        },
+        {
+          "id": "q22",
+          "topic": "having",
+          "difficulty": 3,
+          "text": "Show the category IDs that have more than {{n}} products, with the product count.",
+          "sql": "SELECT CategoryID, COUNT(*) FROM Product GROUP BY CategoryID HAVING COUNT(*) > {{n}}",
+          "params": {
+            "n": {
+              "values": [
+                5,
+                6,
+                7
+              ]
+            }
+          },
+          "hints": [
+            "Conditions on aggregates go in HAVING, not WHERE."
+          ]
+        },
+        {
+          "id": "q23",
+          "topic": "having",
+          "difficulty": 3,
+          "text": "Show the product IDs with a total quantity sold greater than {{n}}, with the total.",
+          "sql": "SELECT ProductID, SUM(Quantity) FROM SoldVia GROUP BY ProductID HAVING SUM(Quantity) > {{n}}",
+          "params": {
+            "n": {
+              "values": [
+                40,
+                60,
+                80
+              ]
+            }
+          }
+        },
+        {
+          "id": "q24",
+          "topic": "having",
+          "difficulty": 4,
+          "text": "Show the customer IDs of customers who made at least {{n}} transactions, with their transaction count.",
+          "sql": "SELECT CustomerID, COUNT(*) FROM SalesTransaction GROUP BY CustomerID HAVING COUNT(*) >= {{n}}",
+          "params": {
+            "n": {
+              "values": [
+                8,
+                10,
+                12
+              ]
+            }
+          }
+        },
+        {
+          "id": "q25",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List each product's name together with its category name.",
+          "sql": "SELECT P.ProductName, C.CategoryName FROM Product P JOIN Category C ON P.CategoryID = C.CategoryID"
+        },
+        {
+          "id": "q26",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List the product name and vendor name for every product supplied by a vendor from {{country}}.",
+          "sql": "SELECT P.ProductName, V.VendorName FROM Product P JOIN Vendor V ON P.VendorID = V.VendorID WHERE V.Country = '{{country}}'",
+          "params": {
+            "country": {
+              "from": "SELECT DISTINCT Country FROM Vendor"
+            }
+          }
+        },
+        {
+          "id": "q27",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List the store name and transaction date of every transaction made by customer {{cid}}.",
+          "sql": "SELECT S.StoreName, T.TDate FROM SalesTransaction T JOIN Store S ON T.StoreID = S.StoreID WHERE T.CustomerID = '{{cid}}'",
+          "params": {
+            "cid": {
+              "from": "SELECT DISTINCT CustomerID FROM SalesTransaction"
+            }
+          }
+        },
+        {
+          "id": "q28",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For every transaction, show the transaction ID, the customer's last name, and the store name.",
+          "sql": "SELECT T.TID, C.LastName, S.StoreName FROM SalesTransaction T JOIN Customer C ON T.CustomerID = C.CustomerID JOIN Store S ON T.StoreID = S.StoreID"
+        },
+        {
+          "id": "q29",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "Show the product name and quantity for every line of transaction {{tid}}.",
+          "sql": "SELECT P.ProductName, S.Quantity FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID WHERE S.TID = '{{tid}}'",
+          "params": {
+            "tid": {
+              "from": "SELECT TID FROM SalesTransaction"
+            }
+          }
+        },
+        {
+          "id": "q30",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For each category name, show the total revenue (sum of LineTotal).",
+          "sql": "SELECT C.CategoryName, SUM(S.LineTotal) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID GROUP BY C.CategoryName",
+          "hints": [
+            "Three tables: SoldVia \u2192 Product \u2192 Category."
+          ]
+        },
+        {
+          "id": "q31",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For each region name, show the number of transactions made in stores of that region.",
+          "sql": "SELECT R.RegionName, COUNT(*) FROM SalesTransaction T JOIN Store S ON T.StoreID = S.StoreID JOIN Region R ON S.RegionID = R.RegionID GROUP BY R.RegionName"
+        },
+        {
+          "id": "q32",
+          "topic": "multi-join",
+          "difficulty": 5,
+          "text": "For each customer who made more than {{n}} transactions, show first name, last name, and the number of transactions.",
+          "sql": "SELECT C.FirstName, C.LastName, COUNT(*) FROM SalesTransaction T JOIN Customer C ON T.CustomerID = C.CustomerID GROUP BY C.CustomerID, C.FirstName, C.LastName HAVING COUNT(*) > {{n}}",
+          "params": {
+            "n": {
+              "values": [
+                8,
+                9,
+                10
+              ]
+            }
+          }
+        },
+        {
+          "id": "q33",
+          "topic": "alias",
+          "difficulty": 3,
+          "text": "List each product name and its price after a 20% discount, for products priced over ${{price}}. Label the discounted price however you like.",
+          "sql": "SELECT ProductName, Price * 0.8 AS SalePrice FROM Product WHERE Price > {{price}}",
+          "params": {
+            "price": {
+              "values": [
+                50,
+                100,
+                300
+              ]
+            }
+          }
+        },
+        {
+          "id": "q34",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the names of products that have never been sold.",
+          "sql": "SELECT ProductName FROM Product WHERE ProductID NOT IN (SELECT ProductID FROM SoldVia)",
+          "hints": [
+            "NOT IN with a subquery over SoldVia."
+          ]
+        },
+        {
+          "id": "q35",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the name and price of products priced above the average product price.",
+          "sql": "SELECT ProductName, Price FROM Product WHERE Price > (SELECT AVG(Price) FROM Product)"
+        },
+        {
+          "id": "q36",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the first and last names of customers who have made at least one purchase at store {{sid}}.",
+          "sql": "SELECT FirstName, LastName FROM Customer WHERE CustomerID IN (SELECT CustomerID FROM SalesTransaction WHERE StoreID = '{{sid}}')",
+          "params": {
+            "sid": {
+              "from": "SELECT DISTINCT StoreID FROM SalesTransaction"
+            }
+          }
+        },
+        {
+          "id": "q37",
+          "topic": "subquery",
+          "difficulty": 5,
+          "text": "List the name(s) of the most expensive product(s).",
+          "sql": "SELECT ProductName FROM Product WHERE Price = (SELECT MAX(Price) FROM Product)"
+        },
+        {
+          "id": "q38",
+          "topic": "set-ops",
+          "difficulty": 4,
+          "text": "List, in one column and without duplicates, every city that is either a customer's city or a store's city.",
+          "sql": "SELECT City FROM Customer UNION SELECT City FROM Store",
+          "hints": [
+            "UNION removes duplicates automatically."
+          ]
+        },
+        {
+          "id": "q39",
+          "topic": "set-ops",
+          "difficulty": 4,
+          "text": "List the cities that are both a customer's city and a store's city.",
+          "sql": "SELECT City FROM Customer INTERSECT SELECT City FROM Store"
+        },
+        {
+          "id": "q40",
+          "topic": "set-ops",
+          "difficulty": 4,
+          "text": "List the cities where customers live but where there is no store.",
+          "sql": "SELECT City FROM Customer EXCEPT SELECT City FROM Store",
+          "hints": [
+            "Oracle calls it MINUS; SQLite calls it EXCEPT."
+          ]
+        },
+        {
+          "id": "q41",
+          "topic": "exists",
+          "difficulty": 5,
+          "text": "List the vendor names that supply at least one product in the category named '{{catname}}'.",
+          "sql": "SELECT VendorName FROM Vendor V WHERE EXISTS (SELECT 1 FROM Product P JOIN Category C ON P.CategoryID = C.CategoryID WHERE P.VendorID = V.VendorID AND C.CategoryName = '{{catname}}')",
+          "params": {
+            "catname": {
+              "from": "SELECT CategoryName FROM Category"
+            }
+          }
+        },
+        {
+          "id": "q42",
+          "topic": "outer-join",
+          "difficulty": 4,
+          "text": "List every store name with its number of transactions, including stores with zero transactions.",
+          "sql": "SELECT S.StoreName, COUNT(T.TID) FROM Store S LEFT JOIN SalesTransaction T ON S.StoreID = T.StoreID GROUP BY S.StoreID, S.StoreName",
+          "hints": [
+            "LEFT JOIN keeps stores without matches; COUNT a column from the right table so the count is 0, not 1."
+          ]
+        },
+        {
+          "id": "q43",
+          "topic": "null",
+          "difficulty": 3,
+          "text": "List the first and last names of customers whose zip code is missing.",
+          "sql": "SELECT FirstName, LastName FROM Customer WHERE Zip IS NULL",
+          "hints": [
+            "Use IS NULL, never = NULL."
+          ]
+        },
+        {
+          "id": "q44",
+          "topic": "null",
+          "difficulty": 3,
+          "text": "How many customers have a zip code on file? Return a single number.",
+          "sql": "SELECT COUNT(Zip) FROM Customer"
+        }
+      ]
+    }
+  ],
+  "presentation": [
+    {
+      "id": "p1-total-revenue",
+      "company": "riverbend",
+      "title": "Total revenue",
+      "difficulty": 1,
+      "database": "riverbend",
+      "brief": "The owner wants one big number on the dashboard: total revenue across all stores and all time. Build a visual that shows just that number.",
+      "hints": [
+        "A card shows a single value.",
+        "Revenue is LineTotal in SoldVia, summed."
+      ],
+      "expected": {
+        "types": [
+          "card"
+        ],
+        "values": [
+          {
+            "field": {
+              "table": "SoldVia",
+              "column": "LineTotal"
+            },
+            "agg": "sum"
+          }
+        ]
+      },
+      "referenceSql": "SELECT SUM(LineTotal) FROM SoldVia"
+    },
+    {
+      "id": "p2-revenue-by-category",
+      "company": "riverbend",
+      "title": "Revenue by category",
+      "difficulty": 2,
+      "database": "riverbend",
+      "brief": "Which product categories bring in the most money? Show total revenue for each category name, ordered from highest to lowest, with a descriptive title.",
+      "hints": [
+        "Categories are unordered, so a bar or column chart fits.",
+        "Use the category NAME, not the ID."
+      ],
+      "expected": {
+        "types": [
+          "clusteredBar",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "Category",
+          "column": "CategoryName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "SoldVia",
+              "column": "LineTotal"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT C.CategoryName, SUM(S.LineTotal) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID GROUP BY C.CategoryName ORDER BY 2 DESC"
+    },
+    {
+      "id": "p3-monthly-trend",
+      "company": "riverbend",
+      "title": "Monthly revenue trend",
+      "difficulty": 2,
+      "database": "riverbend",
+      "brief": "How has revenue developed month by month over the two years? Show the trend of total revenue per month (TMonth), in chronological order, with a title.",
+      "hints": [
+        "Time on the axis calls for a line chart.",
+        "Sort by the axis, not by the value."
+      ],
+      "expected": {
+        "types": [
+          "line"
+        ],
+        "axis": {
+          "table": "SalesTransaction",
+          "column": "TMonth"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "SoldVia",
+              "column": "LineTotal"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "axis",
+          "dir": "asc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT T.TMonth, SUM(S.LineTotal) FROM SalesTransaction T JOIN SoldVia S ON T.TID = S.TID GROUP BY T.TMonth ORDER BY 1"
+    },
+    {
+      "id": "p4-west-stores",
+      "company": "riverbend",
+      "title": "Transactions per store in the West",
+      "difficulty": 3,
+      "database": "riverbend",
+      "brief": "The West regional manager wants to compare her stores. Show the number of transactions for each store name, but only for stores in the West region. Add a title.",
+      "hints": [
+        "Filter on RegionName rather than picking store names by hand.",
+        "Count transactions (TID)."
+      ],
+      "expected": {
+        "types": [
+          "clusteredColumn",
+          "clusteredBar"
+        ],
+        "axis": {
+          "table": "Store",
+          "column": "StoreName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "SalesTransaction",
+              "column": "TID"
+            },
+            "agg": [
+              "count",
+              "countDistinct"
+            ]
+          }
+        ],
+        "filters": [
+          {
+            "field": {
+              "table": "Region",
+              "column": "RegionName"
+            },
+            "op": "in",
+            "values": [
+              "West"
+            ]
+          }
+        ],
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT S.StoreName, COUNT(T.TID) FROM SalesTransaction T JOIN Store S ON T.StoreID = S.StoreID JOIN Region R ON S.RegionID = R.RegionID WHERE R.RegionName = 'West' GROUP BY S.StoreName ORDER BY 2 DESC"
+    },
+    {
+      "id": "p5-vendor-share",
+      "company": "riverbend",
+      "title": "Share of units by vendor",
+      "difficulty": 3,
+      "database": "riverbend",
+      "brief": "Purchasing wants to see what share of all units sold comes from each vendor (by vendor name), as parts of a whole. Give it a title.",
+      "hints": [
+        "'Share of a whole' with a handful of categories suits a pie or donut.",
+        "Units are Quantity in SoldVia."
+      ],
+      "expected": {
+        "types": [
+          "pie",
+          "donut",
+          "clusteredBar",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "Vendor",
+          "column": "VendorName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "SoldVia",
+              "column": "Quantity"
+            },
+            "agg": "sum"
+          }
+        ],
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT V.VendorName, SUM(S.Quantity) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Vendor V ON P.VendorID = V.VendorID GROUP BY V.VendorName ORDER BY 2 DESC"
+    },
+    {
+      "id": "p6-units-by-product",
+      "company": "riverbend",
+      "title": "Units sold by product",
+      "difficulty": 4,
+      "database": "riverbend",
+      "brief": "Which products move the most units? Show total quantity sold for every product name, from most to least sold, with a title. Pick a visual that stays readable with thirty products.",
+      "hints": [
+        "Thirty categories is far too many for a pie.",
+        "Horizontal bars keep long product names readable."
+      ],
+      "expected": {
+        "types": [
+          "clusteredBar",
+          "clusteredColumn",
+          "table"
+        ],
+        "axis": {
+          "table": "Product",
+          "column": "ProductName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "SoldVia",
+              "column": "Quantity"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT P.ProductName, SUM(S.Quantity) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID GROUP BY P.ProductName ORDER BY 2 DESC"
+    },
+    {
+      "id": "p7-category-by-region",
+      "company": "riverbend",
+      "title": "Category revenue by region",
+      "difficulty": 4,
+      "database": "riverbend",
+      "brief": "Do the regions buy different things? Compare total revenue per category name, broken down by region name, in a single visual with a title.",
+      "hints": [
+        "Category on the axis, region in the legend.",
+        "Revenue is the sum of LineTotal."
+      ],
+      "expected": {
+        "types": [
+          "clusteredColumn",
+          "clusteredBar",
+          "stackedColumn"
+        ],
+        "axis": {
+          "table": "Category",
+          "column": "CategoryName"
+        },
+        "legend": {
+          "table": "Region",
+          "column": "RegionName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "SoldVia",
+              "column": "LineTotal"
+            },
+            "agg": "sum"
+          }
+        ],
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT C.CategoryName, R.RegionName, SUM(S.LineTotal) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID JOIN SalesTransaction T ON S.TID = T.TID JOIN Store St ON T.StoreID = St.StoreID JOIN Region R ON St.RegionID = R.RegionID GROUP BY C.CategoryName, R.RegionName ORDER BY 3 DESC"
+    },
+    {
+      "id": "p8-product-table",
+      "company": "riverbend",
+      "title": "Product revenue table",
+      "difficulty": 3,
+      "database": "riverbend",
+      "brief": "Finance wants exact figures, not a picture: a table listing each product name, its category name, and its total revenue, sorted by revenue from high to low.",
+      "hints": [
+        "A table visual; leave the names unsummarized and sum LineTotal.",
+        "Sort by the value."
+      ],
+      "expected": {
+        "types": [
+          "table"
+        ],
+        "columns": [
+          {
+            "table": "Product",
+            "column": "ProductName"
+          },
+          {
+            "table": "Category",
+            "column": "CategoryName"
+          },
+          {
+            "table": "SoldVia",
+            "column": "LineTotal"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        }
+      },
+      "referenceSql": "SELECT P.ProductName, C.CategoryName, SUM(S.LineTotal) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID GROUP BY P.ProductName, C.CategoryName ORDER BY 3 DESC"
+    }
+  ]
+}

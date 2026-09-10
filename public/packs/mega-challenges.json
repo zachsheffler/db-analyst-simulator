@@ -1,0 +1,2514 @@
+{
+  "format": "db-analyst-simulator/pack@1",
+  "id": "mega-challenges",
+  "title": "Mega EpicGames (jobs)",
+  "design": [
+    {
+      "id": "mega-store-publishing",
+      "company": "mega",
+      "title": "Store and publishing",
+      "difficulty": 4,
+      "brief": "Mega EpicGames needs a database for the games it publishes and the store it runs.\n\nA STUDIO develops games. Each studio has a studio ID (unique), a name, a country, and a flag saying whether it is one of Mega's own internal studios. A studio develops many games (a newly signed studio may have none yet); every GAME is developed by exactly one studio.\n\nEach game has a game ID (unique), a title, a release date, a list price, a flag saying whether Mega is the publisher, and the store-cut percentage Mega keeps on each sale (100% for games it publishes, 12% for third-party games). Every game belongs to exactly one GENRE; a genre has a genre ID (unique) and a name, and covers many games or none.\n\nA game is available on one or more PLATFORMS (PC, consoles, mobile). A platform has a platform ID (unique) and a name, and hosts many games or none yet.\n\nA CUSTOMER has a customer ID (unique), a username, a country, a join date, and a membership tier. Each store SALE has a sale ID (unique), a sale date, the price paid, and Mega's revenue, which can be calculated from the price paid and the game's store cut. A sale is for exactly one game by exactly one customer; games and customers may have many sales or none.\n\nCustomers review games: a customer may review many games or none, and a game may have many reviews or none, but a customer can review a given game only once. For each review we record the rating (1-5) and the review date.",
+      "hints": [
+        "Seven entities. Two M:N relationships: available-on (no attributes) and reviews (with attributes).",
+        "'Can be calculated' means MegaRevenue is derived in the ER diagram, even though the production database stores it.",
+        "'Available on one or more platforms' makes the PLATFORM side mandatory for a game."
+      ],
+      "er": {
+        "entities": [
+          {
+            "name": "STUDIO",
+            "aliases": [
+              "Developer"
+            ],
+            "attributes": [
+              {
+                "name": "StudioID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "StudioName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Country"
+              },
+              {
+                "name": "IsInternal",
+                "aliases": [
+                  "Internal",
+                  "InternalFlag",
+                  "Owned"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "GAME",
+            "attributes": [
+              {
+                "name": "GameID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "Name",
+                  "GameTitle"
+                ]
+              },
+              {
+                "name": "ReleaseDate",
+                "aliases": [
+                  "Released",
+                  "Date"
+                ]
+              },
+              {
+                "name": "ListPrice",
+                "aliases": [
+                  "Price"
+                ]
+              },
+              {
+                "name": "PublishedByMega",
+                "aliases": [
+                  "Publisher",
+                  "MegaPublished",
+                  "IsPublisher",
+                  "PublishedFlag"
+                ]
+              },
+              {
+                "name": "StoreCutPct",
+                "aliases": [
+                  "StoreCut",
+                  "Cut",
+                  "CutPct",
+                  "RevenueShare"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "GENRE",
+            "attributes": [
+              {
+                "name": "GenreID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "GenreName",
+                "aliases": [
+                  "Name"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "PLATFORM",
+            "attributes": [
+              {
+                "name": "PlatformID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "PlatformName",
+                "aliases": [
+                  "Name"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "CUSTOMER",
+            "attributes": [
+              {
+                "name": "CustomerID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "Username",
+                "aliases": [
+                  "Name",
+                  "UserName",
+                  "Handle"
+                ]
+              },
+              {
+                "name": "Country"
+              },
+              {
+                "name": "JoinDate",
+                "aliases": [
+                  "Joined"
+                ]
+              },
+              {
+                "name": "Tier",
+                "aliases": [
+                  "MembershipTier",
+                  "Membership"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "SALE",
+            "aliases": [
+              "StoreSale",
+              "Purchase"
+            ],
+            "attributes": [
+              {
+                "name": "SaleID",
+                "aliases": [
+                  "ID",
+                  "PurchaseID"
+                ],
+                "key": true
+              },
+              {
+                "name": "SaleDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "PricePaid",
+                "aliases": [
+                  "Paid",
+                  "Price",
+                  "Amount"
+                ]
+              },
+              {
+                "name": "MegaRevenue",
+                "aliases": [
+                  "Revenue",
+                  "MegaCut",
+                  "Cut"
+                ],
+                "derived": true
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "name": "Develops",
+            "aliases": [
+              "DevelopedBy",
+              "Makes",
+              "Builds",
+              "Creates"
+            ],
+            "sides": [
+              {
+                "entity": "STUDIO",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "GAME",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Every game has exactly one studio; a studio develops many games or none."
+          },
+          {
+            "name": "BelongsTo",
+            "aliases": [
+              "Has",
+              "In",
+              "Classifies",
+              "IsGenre",
+              "Categorizes"
+            ],
+            "sides": [
+              {
+                "entity": "GENRE",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "GAME",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Every game has exactly one genre; a genre covers many games or none."
+          },
+          {
+            "name": "AvailableOn",
+            "aliases": [
+              "RunsOn",
+              "ReleasedOn",
+              "Supports",
+              "Hosts",
+              "On"
+            ],
+            "sides": [
+              {
+                "entity": "GAME",
+                "max": "M",
+                "min": "optional"
+              },
+              {
+                "entity": "PLATFORM",
+                "max": "M",
+                "min": "mandatory"
+              }
+            ],
+            "rationale": "A game is on one or more platforms (mandatory on the platform side); a platform hosts many games or none."
+          },
+          {
+            "name": "SoldIn",
+            "aliases": [
+              "Sold",
+              "Of",
+              "For",
+              "GameSold",
+              "Has"
+            ],
+            "sides": [
+              {
+                "entity": "GAME",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "SALE",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each sale is for exactly one game; a game has many sales or none."
+          },
+          {
+            "name": "Buys",
+            "aliases": [
+              "Makes",
+              "Purchases",
+              "BoughtBy",
+              "Places"
+            ],
+            "sides": [
+              {
+                "entity": "CUSTOMER",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "SALE",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each sale is by exactly one customer; a customer has many sales or none."
+          },
+          {
+            "name": "Reviews",
+            "aliases": [
+              "Rates",
+              "Review",
+              "ReviewedBy",
+              "Rating"
+            ],
+            "sides": [
+              {
+                "entity": "CUSTOMER",
+                "max": "M",
+                "min": "optional"
+              },
+              {
+                "entity": "GAME",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "attributes": [
+              {
+                "name": "Rating",
+                "aliases": [
+                  "Score",
+                  "Stars"
+                ]
+              },
+              {
+                "name": "ReviewDate",
+                "aliases": [
+                  "Date"
+                ]
+              }
+            ],
+            "rationale": "Many-to-many with attributes; 'only once' is enforced by the bridge table's composite key."
+          }
+        ]
+      },
+      "schema": {
+        "tables": [
+          {
+            "name": "STUDIO",
+            "aliases": [
+              "Developer"
+            ],
+            "columns": [
+              {
+                "name": "StudioID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "StudioName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Country"
+              },
+              {
+                "name": "IsInternal",
+                "aliases": [
+                  "Internal"
+                ]
+              }
+            ],
+            "pk": [
+              "StudioID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "GENRE",
+            "columns": [
+              {
+                "name": "GenreID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "GenreName",
+                "aliases": [
+                  "Name"
+                ]
+              }
+            ],
+            "pk": [
+              "GenreID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "PLATFORM",
+            "columns": [
+              {
+                "name": "PlatformID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "PlatformName",
+                "aliases": [
+                  "Name"
+                ]
+              }
+            ],
+            "pk": [
+              "PlatformID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "GAME",
+            "columns": [
+              {
+                "name": "GameID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "ReleaseDate"
+              },
+              {
+                "name": "ListPrice",
+                "aliases": [
+                  "Price"
+                ]
+              },
+              {
+                "name": "PublishedByMega",
+                "aliases": [
+                  "Publisher",
+                  "MegaPublished"
+                ]
+              },
+              {
+                "name": "StoreCutPct",
+                "aliases": [
+                  "StoreCut",
+                  "Cut"
+                ]
+              },
+              {
+                "name": "StudioID",
+                "aliases": [
+                  "DeveloperID"
+                ]
+              },
+              {
+                "name": "GenreID"
+              }
+            ],
+            "pk": [
+              "GameID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "StudioID"
+                ],
+                "refTable": "STUDIO"
+              },
+              {
+                "columns": [
+                  "GenreID"
+                ],
+                "refTable": "GENRE"
+              }
+            ]
+          },
+          {
+            "name": "GAME_PLATFORM",
+            "aliases": [
+              "GamePlatform",
+              "AvailableOn",
+              "Availability",
+              "PlatformGame",
+              "GameAvailability"
+            ],
+            "note": "The M:N AvailableOn relationship needs a bridge table.",
+            "columns": [
+              {
+                "name": "GameID"
+              },
+              {
+                "name": "PlatformID"
+              }
+            ],
+            "pk": [
+              "GameID",
+              "PlatformID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "GameID"
+                ],
+                "refTable": "GAME"
+              },
+              {
+                "columns": [
+                  "PlatformID"
+                ],
+                "refTable": "PLATFORM"
+              }
+            ]
+          },
+          {
+            "name": "CUSTOMER",
+            "columns": [
+              {
+                "name": "CustomerID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "Username",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Country"
+              },
+              {
+                "name": "JoinDate"
+              },
+              {
+                "name": "Tier"
+              }
+            ],
+            "pk": [
+              "CustomerID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "SALE",
+            "aliases": [
+              "StoreSale",
+              "Purchase"
+            ],
+            "columns": [
+              {
+                "name": "SaleID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "SaleDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "PricePaid",
+                "aliases": [
+                  "Price",
+                  "Paid"
+                ]
+              },
+              {
+                "name": "GameID"
+              },
+              {
+                "name": "CustomerID"
+              }
+            ],
+            "pk": [
+              "SaleID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "GameID"
+                ],
+                "refTable": "GAME"
+              },
+              {
+                "columns": [
+                  "CustomerID"
+                ],
+                "refTable": "CUSTOMER"
+              }
+            ]
+          },
+          {
+            "name": "REVIEW",
+            "aliases": [
+              "Reviews",
+              "GameReview",
+              "CustomerReview",
+              "Rating"
+            ],
+            "note": "The M:N Reviews relationship becomes a bridge table with Rating and ReviewDate; its composite key enforces one review per customer per game.",
+            "columns": [
+              {
+                "name": "GameID"
+              },
+              {
+                "name": "CustomerID"
+              },
+              {
+                "name": "Rating",
+                "aliases": [
+                  "Score"
+                ]
+              },
+              {
+                "name": "ReviewDate",
+                "aliases": [
+                  "Date"
+                ]
+              }
+            ],
+            "pk": [
+              "GameID",
+              "CustomerID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "GameID"
+                ],
+                "refTable": "GAME"
+              },
+              {
+                "columns": [
+                  "CustomerID"
+                ],
+                "refTable": "CUSTOMER"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "MegaRevenue is derived (PricePaid \u00d7 StoreCutPct / 100) so it is not a column here. The production database stores it anyway for speed; that is a deliberate denormalization."
+        ]
+      },
+      "ddl": {
+        "tests": [
+          {
+            "description": "Reference rows insert cleanly.",
+            "sql": "INSERT INTO STUDIO (StudioID, StudioName, Country, IsInternal) VALUES (1, 'Mega Studios Cary', 'USA', 1); INSERT INTO GENRE (GenreID, GenreName) VALUES (1, 'Shooter'); INSERT INTO PLATFORM (PlatformID, PlatformName) VALUES (1, 'PC'); INSERT INTO GAME (GameID, Title, ReleaseDate, ListPrice, PublishedByMega, StoreCutPct, StudioID, GenreID) VALUES (1, 'Fortnight Royale', '2017-09-26', 0, 1, 100, 1, 1); INSERT INTO GAME_PLATFORM (GameID, PlatformID) VALUES (1, 1); INSERT INTO CUSTOMER (CustomerID, Username, Country, JoinDate, Tier) VALUES (1, 'ShadowFox7', 'USA', '2021-05-01', 'Free')",
+            "expect": "ok"
+          },
+          {
+            "description": "A game from a studio that does not exist is rejected.",
+            "sql": "INSERT INTO GAME (GameID, Title, ReleaseDate, ListPrice, PublishedByMega, StoreCutPct, StudioID, GenreID) VALUES (2, 'Ghost', '2025-01-01', 9.99, 0, 12, 99, 1)",
+            "expect": "error"
+          },
+          {
+            "description": "A sale by an existing customer for an existing game works.",
+            "sql": "INSERT INTO SALE (SaleID, SaleDate, PricePaid, GameID, CustomerID) VALUES (1, '2025-03-01', 0, 1, 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "A review works once\u2026",
+            "sql": "INSERT INTO REVIEW (GameID, CustomerID, Rating, ReviewDate) VALUES (1, 1, 5, '2025-03-02')",
+            "expect": "ok"
+          },
+          {
+            "description": "\u2026but the same customer reviewing the same game again is rejected.",
+            "sql": "INSERT INTO REVIEW (GameID, CustomerID, Rating, ReviewDate) VALUES (1, 1, 1, '2025-03-03')",
+            "expect": "error"
+          },
+          {
+            "description": "Listing a game on a platform that does not exist is rejected.",
+            "sql": "INSERT INTO GAME_PLATFORM (GameID, PlatformID) VALUES (1, 42)",
+            "expect": "error"
+          },
+          {
+            "description": "Listing the same game on the same platform twice is rejected.",
+            "sql": "INSERT INTO GAME_PLATFORM (GameID, PlatformID) VALUES (1, 1)",
+            "expect": "error"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mega-hardware-credit",
+      "company": "mega",
+      "title": "Hardware and credit",
+      "difficulty": 5,
+      "brief": "Mega EpicGames sells its own hardware and, against Finance's advice, extends credit to customers. Model this part of the business.\n\nA CUSTOMER has a customer ID (unique), a username, and a country.\n\nA HARDWARE PRODUCT has a hardware ID (unique), a product name, a hardware type (console, controller, headset, accessory), a unit cost, a unit price, and one or more available colors.\n\nA customer places HARDWARE ORDERS. Each order has an order ID (unique), an order date, a payment method (card or credit), and a shipping address made up of a street, a city, and a country. An order is placed by exactly one customer; a customer places many orders or none. The order total can be calculated from its lines.\n\nAn order contains one or more hardware products, and a product appears in many orders or none. For each product in an order we record the quantity and the unit price actually paid.\n\nA customer may hold at most one CREDIT ACCOUNT, and most customers have none; each credit account belongs to exactly one customer. An account has an account ID (unique), a credit limit, an open date, and a status (open, frozen, closed).\n\nEvery movement on an account is a CREDIT TRANSACTION with a transaction number, a date, a type (charge, payment, or fee), and an amount. Transaction numbers restart at 1 for every account, so a transaction can only be identified together with its account. An account has many transactions or none. A charge transaction pays for exactly one hardware order; payments and fees are not tied to any order. An order is paid for by at most one transaction (orders paid by card have none).",
+      "hints": [
+        "'At most one ... most have none ... exactly one customer' is a 1:1 relationship; put the foreign key on the CREDIT ACCOUNT side (mandatory side) and make it unique.",
+        "'Can only be identified together with its account' means CREDIT TRANSACTION is a weak entity with a partial key and an identifying relationship.",
+        "'One or more available colors' is multivalued; 'shipping address made up of' is composite; 'can be calculated' is derived.",
+        "The PaysFor relationship between CREDIT TRANSACTION and HARDWARE ORDER is 1:1 and optional on both sides: a nullable, unique OrderID on the transaction is the cleanest mapping."
+      ],
+      "er": {
+        "entities": [
+          {
+            "name": "CUSTOMER",
+            "attributes": [
+              {
+                "name": "CustomerID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "Username",
+                "aliases": [
+                  "Name",
+                  "UserName"
+                ]
+              },
+              {
+                "name": "Country"
+              }
+            ]
+          },
+          {
+            "name": "HARDWARE_PRODUCT",
+            "aliases": [
+              "HardwareProduct",
+              "Hardware",
+              "Product"
+            ],
+            "attributes": [
+              {
+                "name": "HardwareID",
+                "aliases": [
+                  "ID",
+                  "ProductID"
+                ],
+                "key": true
+              },
+              {
+                "name": "ProductName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "HardwareType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "UnitCost",
+                "aliases": [
+                  "Cost"
+                ]
+              },
+              {
+                "name": "UnitPrice",
+                "aliases": [
+                  "Price"
+                ]
+              },
+              {
+                "name": "Color",
+                "aliases": [
+                  "Colors",
+                  "AvailableColor",
+                  "AvailableColors",
+                  "Colour"
+                ],
+                "multivalued": true
+              }
+            ]
+          },
+          {
+            "name": "HARDWARE_ORDER",
+            "aliases": [
+              "HardwareOrder",
+              "Order"
+            ],
+            "attributes": [
+              {
+                "name": "OrderID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "OrderDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "PaymentMethod",
+                "aliases": [
+                  "Payment",
+                  "Method"
+                ]
+              },
+              {
+                "name": "ShipAddress",
+                "aliases": [
+                  "ShippingAddress",
+                  "Address"
+                ],
+                "composite": [
+                  "Street",
+                  "City",
+                  "Country"
+                ]
+              },
+              {
+                "name": "OrderTotal",
+                "aliases": [
+                  "Total",
+                  "Amount"
+                ],
+                "derived": true
+              }
+            ]
+          },
+          {
+            "name": "CREDIT_ACCOUNT",
+            "aliases": [
+              "CreditAccount",
+              "Account"
+            ],
+            "attributes": [
+              {
+                "name": "AccountID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "CreditLimit",
+                "aliases": [
+                  "Limit"
+                ]
+              },
+              {
+                "name": "OpenDate",
+                "aliases": [
+                  "Opened",
+                  "Date"
+                ]
+              },
+              {
+                "name": "Status"
+              }
+            ]
+          },
+          {
+            "name": "CREDIT_TRANSACTION",
+            "aliases": [
+              "CreditTransaction",
+              "Transaction",
+              "Txn"
+            ],
+            "weak": true,
+            "attributes": [
+              {
+                "name": "TxnNo",
+                "aliases": [
+                  "TransactionNo",
+                  "TransactionNumber",
+                  "TxnNumber",
+                  "Number",
+                  "No"
+                ],
+                "partialKey": true
+              },
+              {
+                "name": "TxnDate",
+                "aliases": [
+                  "Date",
+                  "TransactionDate"
+                ]
+              },
+              {
+                "name": "TxnType",
+                "aliases": [
+                  "Type",
+                  "TransactionType"
+                ]
+              },
+              {
+                "name": "Amount"
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "name": "Places",
+            "aliases": [
+              "Orders",
+              "Makes",
+              "PlacedBy"
+            ],
+            "sides": [
+              {
+                "entity": "CUSTOMER",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "HARDWARE_ORDER",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "An order is placed by exactly one customer; a customer places many orders or none."
+          },
+          {
+            "name": "Contains",
+            "aliases": [
+              "OrderLine",
+              "Includes",
+              "Has",
+              "LineItem",
+              "Line"
+            ],
+            "sides": [
+              {
+                "entity": "HARDWARE_ORDER",
+                "max": "M",
+                "min": "optional"
+              },
+              {
+                "entity": "HARDWARE_PRODUCT",
+                "max": "M",
+                "min": "mandatory"
+              }
+            ],
+            "attributes": [
+              {
+                "name": "Quantity",
+                "aliases": [
+                  "Qty"
+                ]
+              },
+              {
+                "name": "UnitPricePaid",
+                "aliases": [
+                  "PricePaid",
+                  "Paid",
+                  "Price"
+                ]
+              }
+            ],
+            "rationale": "M:N with attributes: an order contains one or more products (mandatory on the product side); a product is in many orders or none."
+          },
+          {
+            "name": "Holds",
+            "aliases": [
+              "Has",
+              "Owns",
+              "HeldBy",
+              "BelongsTo"
+            ],
+            "sides": [
+              {
+                "entity": "CUSTOMER",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "CREDIT_ACCOUNT",
+                "max": "1",
+                "min": "optional"
+              }
+            ],
+            "rationale": "1:1: each account belongs to exactly one customer; a customer has at most one account and usually none."
+          },
+          {
+            "name": "Records",
+            "aliases": [
+              "Has",
+              "Logs",
+              "Contains",
+              "Posts"
+            ],
+            "identifying": true,
+            "sides": [
+              {
+                "entity": "CREDIT_ACCOUNT",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "CREDIT_TRANSACTION",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Identifying relationship: every transaction belongs to exactly one account; an account has many transactions or none."
+          },
+          {
+            "name": "PaysFor",
+            "aliases": [
+              "Pays",
+              "Charges",
+              "Settles",
+              "PaidBy",
+              "For"
+            ],
+            "sides": [
+              {
+                "entity": "CREDIT_TRANSACTION",
+                "max": "1",
+                "min": "optional"
+              },
+              {
+                "entity": "HARDWARE_ORDER",
+                "max": "1",
+                "min": "optional"
+              }
+            ],
+            "rationale": "1:1 and optional both ways: a charge pays for one order, but payments and fees pay for none; an order is paid by at most one transaction."
+          }
+        ]
+      },
+      "schema": {
+        "tables": [
+          {
+            "name": "CUSTOMER",
+            "columns": [
+              {
+                "name": "CustomerID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "Username",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Country"
+              }
+            ],
+            "pk": [
+              "CustomerID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "HARDWARE_PRODUCT",
+            "aliases": [
+              "HardwareProduct",
+              "Hardware",
+              "Product"
+            ],
+            "columns": [
+              {
+                "name": "HardwareID",
+                "aliases": [
+                  "ID",
+                  "ProductID"
+                ]
+              },
+              {
+                "name": "ProductName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "HardwareType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "UnitCost",
+                "aliases": [
+                  "Cost"
+                ]
+              },
+              {
+                "name": "UnitPrice",
+                "aliases": [
+                  "Price"
+                ]
+              }
+            ],
+            "pk": [
+              "HardwareID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "HARDWARE_COLOR",
+            "aliases": [
+              "HardwareColor",
+              "ProductColor",
+              "Color",
+              "AvailableColor",
+              "HardwareProductColor"
+            ],
+            "note": "The multivalued Color attribute becomes its own table.",
+            "columns": [
+              {
+                "name": "HardwareID",
+                "aliases": [
+                  "ProductID"
+                ]
+              },
+              {
+                "name": "Color",
+                "aliases": [
+                  "Colour",
+                  "ColorName"
+                ]
+              }
+            ],
+            "pk": [
+              "HardwareID",
+              "Color"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "HardwareID"
+                ],
+                "refTable": "HARDWARE_PRODUCT"
+              }
+            ]
+          },
+          {
+            "name": "HARDWARE_ORDER",
+            "aliases": [
+              "HardwareOrder",
+              "Order"
+            ],
+            "columns": [
+              {
+                "name": "OrderID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "OrderDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "PaymentMethod",
+                "aliases": [
+                  "Payment"
+                ]
+              },
+              {
+                "name": "ShipStreet",
+                "aliases": [
+                  "Street"
+                ]
+              },
+              {
+                "name": "ShipCity",
+                "aliases": [
+                  "City"
+                ]
+              },
+              {
+                "name": "ShipCountry",
+                "aliases": [
+                  "Country"
+                ]
+              },
+              {
+                "name": "CustomerID"
+              }
+            ],
+            "pk": [
+              "OrderID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "CustomerID"
+                ],
+                "refTable": "CUSTOMER"
+              }
+            ]
+          },
+          {
+            "name": "ORDER_LINE",
+            "aliases": [
+              "OrderLine",
+              "HardwareOrderLine",
+              "Contains",
+              "LineItem",
+              "OrderItem",
+              "OrderProduct"
+            ],
+            "note": "The M:N Contains relationship becomes a bridge table with Quantity and UnitPricePaid.",
+            "columns": [
+              {
+                "name": "OrderID"
+              },
+              {
+                "name": "HardwareID",
+                "aliases": [
+                  "ProductID"
+                ]
+              },
+              {
+                "name": "Quantity",
+                "aliases": [
+                  "Qty"
+                ]
+              },
+              {
+                "name": "UnitPricePaid",
+                "aliases": [
+                  "PricePaid",
+                  "Price"
+                ]
+              }
+            ],
+            "pk": [
+              "OrderID",
+              "HardwareID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "OrderID"
+                ],
+                "refTable": "HARDWARE_ORDER"
+              },
+              {
+                "columns": [
+                  "HardwareID"
+                ],
+                "refTable": "HARDWARE_PRODUCT"
+              }
+            ]
+          },
+          {
+            "name": "CREDIT_ACCOUNT",
+            "aliases": [
+              "CreditAccount",
+              "Account"
+            ],
+            "columns": [
+              {
+                "name": "AccountID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "CreditLimit",
+                "aliases": [
+                  "Limit"
+                ]
+              },
+              {
+                "name": "OpenDate",
+                "aliases": [
+                  "Opened"
+                ]
+              },
+              {
+                "name": "Status"
+              },
+              {
+                "name": "CustomerID",
+                "unique": true
+              }
+            ],
+            "pk": [
+              "AccountID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "CustomerID"
+                ],
+                "refTable": "CUSTOMER"
+              }
+            ]
+          },
+          {
+            "name": "CREDIT_TRANSACTION",
+            "aliases": [
+              "CreditTransaction",
+              "Transaction",
+              "Txn"
+            ],
+            "note": "Weak entity: PK = AccountID + TxnNo.",
+            "columns": [
+              {
+                "name": "AccountID"
+              },
+              {
+                "name": "TxnNo",
+                "aliases": [
+                  "TransactionNo",
+                  "Number",
+                  "No"
+                ]
+              },
+              {
+                "name": "TxnDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "TxnType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "Amount"
+              },
+              {
+                "name": "OrderID",
+                "nullable": true
+              }
+            ],
+            "pk": [
+              "AccountID",
+              "TxnNo"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "AccountID"
+                ],
+                "refTable": "CREDIT_ACCOUNT"
+              },
+              {
+                "columns": [
+                  "OrderID"
+                ],
+                "refTable": "HARDWARE_ORDER"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "CREDIT_ACCOUNT.CustomerID must be UNIQUE to enforce the 1:1 relationship.",
+          "CREDIT_TRANSACTION.OrderID is NULL for payments and fees. Placing the FK on HARDWARE_ORDER instead (a nullable TxnNo + AccountID pair) is also acceptable and is offered as an alternate."
+        ],
+        "alternates": [
+          {
+            "tables": [
+              {
+                "name": "CUSTOMER",
+                "columns": [
+                  {
+                    "name": "CustomerID",
+                    "aliases": [
+                      "ID"
+                    ]
+                  },
+                  {
+                    "name": "Username",
+                    "aliases": [
+                      "Name"
+                    ]
+                  },
+                  {
+                    "name": "Country"
+                  }
+                ],
+                "pk": [
+                  "CustomerID"
+                ],
+                "fks": []
+              },
+              {
+                "name": "HARDWARE_PRODUCT",
+                "aliases": [
+                  "HardwareProduct",
+                  "Hardware",
+                  "Product"
+                ],
+                "columns": [
+                  {
+                    "name": "HardwareID",
+                    "aliases": [
+                      "ID",
+                      "ProductID"
+                    ]
+                  },
+                  {
+                    "name": "ProductName",
+                    "aliases": [
+                      "Name"
+                    ]
+                  },
+                  {
+                    "name": "HardwareType",
+                    "aliases": [
+                      "Type"
+                    ]
+                  },
+                  {
+                    "name": "UnitCost",
+                    "aliases": [
+                      "Cost"
+                    ]
+                  },
+                  {
+                    "name": "UnitPrice",
+                    "aliases": [
+                      "Price"
+                    ]
+                  }
+                ],
+                "pk": [
+                  "HardwareID"
+                ],
+                "fks": []
+              },
+              {
+                "name": "HARDWARE_COLOR",
+                "aliases": [
+                  "HardwareColor",
+                  "ProductColor",
+                  "Color",
+                  "AvailableColor",
+                  "HardwareProductColor"
+                ],
+                "columns": [
+                  {
+                    "name": "HardwareID",
+                    "aliases": [
+                      "ProductID"
+                    ]
+                  },
+                  {
+                    "name": "Color",
+                    "aliases": [
+                      "Colour",
+                      "ColorName"
+                    ]
+                  }
+                ],
+                "pk": [
+                  "HardwareID",
+                  "Color"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "HardwareID"
+                    ],
+                    "refTable": "HARDWARE_PRODUCT"
+                  }
+                ]
+              },
+              {
+                "name": "CREDIT_ACCOUNT",
+                "aliases": [
+                  "CreditAccount",
+                  "Account"
+                ],
+                "columns": [
+                  {
+                    "name": "AccountID",
+                    "aliases": [
+                      "ID"
+                    ]
+                  },
+                  {
+                    "name": "CreditLimit",
+                    "aliases": [
+                      "Limit"
+                    ]
+                  },
+                  {
+                    "name": "OpenDate",
+                    "aliases": [
+                      "Opened"
+                    ]
+                  },
+                  {
+                    "name": "Status"
+                  },
+                  {
+                    "name": "CustomerID",
+                    "unique": true
+                  }
+                ],
+                "pk": [
+                  "AccountID"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "CustomerID"
+                    ],
+                    "refTable": "CUSTOMER"
+                  }
+                ]
+              },
+              {
+                "name": "CREDIT_TRANSACTION",
+                "aliases": [
+                  "CreditTransaction",
+                  "Transaction",
+                  "Txn"
+                ],
+                "columns": [
+                  {
+                    "name": "AccountID"
+                  },
+                  {
+                    "name": "TxnNo",
+                    "aliases": [
+                      "TransactionNo",
+                      "Number",
+                      "No"
+                    ]
+                  },
+                  {
+                    "name": "TxnDate",
+                    "aliases": [
+                      "Date"
+                    ]
+                  },
+                  {
+                    "name": "TxnType",
+                    "aliases": [
+                      "Type"
+                    ]
+                  },
+                  {
+                    "name": "Amount"
+                  }
+                ],
+                "pk": [
+                  "AccountID",
+                  "TxnNo"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "AccountID"
+                    ],
+                    "refTable": "CREDIT_ACCOUNT"
+                  }
+                ]
+              },
+              {
+                "name": "HARDWARE_ORDER",
+                "aliases": [
+                  "HardwareOrder",
+                  "Order"
+                ],
+                "columns": [
+                  {
+                    "name": "OrderID",
+                    "aliases": [
+                      "ID"
+                    ]
+                  },
+                  {
+                    "name": "OrderDate",
+                    "aliases": [
+                      "Date"
+                    ]
+                  },
+                  {
+                    "name": "PaymentMethod",
+                    "aliases": [
+                      "Payment"
+                    ]
+                  },
+                  {
+                    "name": "ShipStreet",
+                    "aliases": [
+                      "Street"
+                    ]
+                  },
+                  {
+                    "name": "ShipCity",
+                    "aliases": [
+                      "City"
+                    ]
+                  },
+                  {
+                    "name": "ShipCountry",
+                    "aliases": [
+                      "Country"
+                    ]
+                  },
+                  {
+                    "name": "CustomerID"
+                  },
+                  {
+                    "name": "AccountID",
+                    "aliases": [
+                      "PaidAccountID",
+                      "TxnAccountID"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "name": "TxnNo",
+                    "aliases": [
+                      "PaidTxnNo",
+                      "TransactionNo"
+                    ],
+                    "nullable": true
+                  }
+                ],
+                "pk": [
+                  "OrderID"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "CustomerID"
+                    ],
+                    "refTable": "CUSTOMER"
+                  },
+                  {
+                    "columns": [
+                      "AccountID",
+                      "TxnNo"
+                    ],
+                    "refTable": "CREDIT_TRANSACTION"
+                  }
+                ]
+              },
+              {
+                "name": "ORDER_LINE",
+                "aliases": [
+                  "OrderLine",
+                  "HardwareOrderLine",
+                  "Contains",
+                  "LineItem",
+                  "OrderItem",
+                  "OrderProduct"
+                ],
+                "columns": [
+                  {
+                    "name": "OrderID"
+                  },
+                  {
+                    "name": "HardwareID",
+                    "aliases": [
+                      "ProductID"
+                    ]
+                  },
+                  {
+                    "name": "Quantity",
+                    "aliases": [
+                      "Qty"
+                    ]
+                  },
+                  {
+                    "name": "UnitPricePaid",
+                    "aliases": [
+                      "PricePaid",
+                      "Price"
+                    ]
+                  }
+                ],
+                "pk": [
+                  "OrderID",
+                  "HardwareID"
+                ],
+                "fks": [
+                  {
+                    "columns": [
+                      "OrderID"
+                    ],
+                    "refTable": "HARDWARE_ORDER"
+                  },
+                  {
+                    "columns": [
+                      "HardwareID"
+                    ],
+                    "refTable": "HARDWARE_PRODUCT"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ddl": {
+        "tests": [
+          {
+            "description": "Customers, a product with two colors, and an account insert cleanly.",
+            "sql": "INSERT INTO CUSTOMER (CustomerID, Username, Country) VALUES (1, 'ShadowFox7', 'USA'); INSERT INTO CUSTOMER (CustomerID, Username, Country) VALUES (2, 'NeonOtter3', 'Canada'); INSERT INTO HARDWARE_PRODUCT (HardwareID, ProductName, HardwareType, UnitCost, UnitPrice) VALUES (1, 'MegaPad Controller', 'Controller', 28, 59.99); INSERT INTO HARDWARE_COLOR (HardwareID, Color) VALUES (1, 'Black'); INSERT INTO HARDWARE_COLOR (HardwareID, Color) VALUES (1, 'White'); INSERT INTO CREDIT_ACCOUNT (AccountID, CreditLimit, OpenDate, Status, CustomerID) VALUES (1, 1000, '2024-02-01', 'Open', 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "A second credit account for the same customer is rejected (1:1).",
+            "sql": "INSERT INTO CREDIT_ACCOUNT (AccountID, CreditLimit, OpenDate, Status, CustomerID) VALUES (2, 500, '2024-03-01', 'Open', 1)",
+            "expect": "error"
+          },
+          {
+            "description": "An order with a line, paid by a charge on the account.",
+            "sql": "INSERT INTO HARDWARE_ORDER (OrderID, OrderDate, PaymentMethod, ShipStreet, ShipCity, ShipCountry, CustomerID) VALUES (1, '2024-04-01', 'Credit', '1 Main St', 'Cary', 'USA', 1); INSERT INTO ORDER_LINE (OrderID, HardwareID, Quantity, UnitPricePaid) VALUES (1, 1, 2, 59.99); INSERT INTO CREDIT_TRANSACTION (AccountID, TxnNo, TxnDate, TxnType, Amount, OrderID) VALUES (1, 1, '2024-04-01', 'Charge', 119.98, 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "A payment with no order is allowed (NULL).",
+            "sql": "INSERT INTO CREDIT_TRANSACTION (AccountID, TxnNo, TxnDate, TxnType, Amount, OrderID) VALUES (1, 2, '2024-05-01', 'Payment', 119.98, NULL)",
+            "expect": "ok"
+          },
+          {
+            "description": "Transaction number 1 on a different account is fine (weak entity).",
+            "sql": "INSERT INTO CREDIT_ACCOUNT (AccountID, CreditLimit, OpenDate, Status, CustomerID) VALUES (3, 500, '2024-06-01', 'Open', 2); INSERT INTO CREDIT_TRANSACTION (AccountID, TxnNo, TxnDate, TxnType, Amount, OrderID) VALUES (3, 1, '2024-06-02', 'Fee', 15, NULL)",
+            "expect": "ok"
+          },
+          {
+            "description": "A duplicate transaction number on the same account is rejected.",
+            "sql": "INSERT INTO CREDIT_TRANSACTION (AccountID, TxnNo, TxnDate, TxnType, Amount, OrderID) VALUES (1, 1, '2024-07-01', 'Fee', 15, NULL)",
+            "expect": "error"
+          },
+          {
+            "description": "A transaction on a non-existent account is rejected.",
+            "sql": "INSERT INTO CREDIT_TRANSACTION (AccountID, TxnNo, TxnDate, TxnType, Amount, OrderID) VALUES (99, 1, '2024-07-01', 'Fee', 15, NULL)",
+            "expect": "error"
+          },
+          {
+            "description": "An order line for a product that does not exist is rejected.",
+            "sql": "INSERT INTO ORDER_LINE (OrderID, HardwareID, Quantity, UnitPricePaid) VALUES (1, 77, 1, 10)",
+            "expect": "error"
+          }
+        ]
+      }
+    }
+  ],
+  "queries": [
+    {
+      "id": "mega-sql",
+      "company": "mega",
+      "title": "Mega EpicGames \u2014 SQL sprint",
+      "database": "mega",
+      "questions": [
+        {
+          "id": "m01",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "List the title and list price of every game.",
+          "sql": "SELECT Title, ListPrice FROM Game"
+        },
+        {
+          "id": "m02",
+          "topic": "select-where",
+          "difficulty": 2,
+          "text": "List the title and release date of games released after {{y}}-12-31 that Mega publishes.",
+          "sql": "SELECT Title, ReleaseDate FROM Game WHERE ReleaseDate > '{{y}}-12-31' AND PublishedByMega = 1",
+          "params": {
+            "y": {
+              "values": [
+                2018,
+                2020,
+                2022
+              ]
+            }
+          }
+        },
+        {
+          "id": "m03",
+          "topic": "select-where",
+          "difficulty": 2,
+          "text": "List the username and country of customers on the '{{tier}}' tier who joined before {{y}}-01-01.",
+          "sql": "SELECT Username, Country FROM Customer WHERE Tier = '{{tier}}' AND JoinDate < '{{y}}-01-01'",
+          "params": {
+            "tier": {
+              "values": [
+                "Free",
+                "Plus"
+              ]
+            },
+            "y": {
+              "values": [
+                2021,
+                2022,
+                2023
+              ]
+            }
+          }
+        },
+        {
+          "id": "m04",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List the distinct countries of our customers, alphabetically.",
+          "sql": "SELECT DISTINCT Country FROM Customer ORDER BY Country",
+          "orderMatters": true
+        },
+        {
+          "id": "m05",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List every hardware product's name and unit price, most expensive first.",
+          "sql": "SELECT ProductName, UnitPrice FROM HardwareProduct ORDER BY UnitPrice DESC",
+          "orderMatters": true
+        },
+        {
+          "id": "m06",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the titles of games whose title contains '{{word}}'.",
+          "sql": "SELECT Title FROM Game WHERE Title LIKE '%{{word}}%'",
+          "params": {
+            "word": {
+              "values": [
+                "Mega",
+                "Fortnight",
+                "of",
+                "II"
+              ]
+            }
+          }
+        },
+        {
+          "id": "m07",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the title and list price of games priced between ${{lo}} and ${{hi}} inclusive.",
+          "sql": "SELECT Title, ListPrice FROM Game WHERE ListPrice BETWEEN {{lo}} AND {{hi}}",
+          "params": {
+            "lo": {
+              "values": [
+                10,
+                15,
+                20
+              ]
+            },
+            "hi": {
+              "values": [
+                30,
+                45,
+                60
+              ]
+            }
+          }
+        },
+        {
+          "id": "m08",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the studio names based in {{c1}}, {{c2}} or {{c3}}.",
+          "sql": "SELECT StudioName FROM Studio WHERE Country IN ('{{c1}}', '{{c2}}', '{{c3}}')",
+          "params": {
+            "c1": {
+              "values": [
+                "USA",
+                "Canada"
+              ]
+            },
+            "c2": {
+              "values": [
+                "Japan",
+                "Sweden"
+              ]
+            },
+            "c3": {
+              "values": [
+                "Germany",
+                "Poland",
+                "Australia"
+              ]
+            }
+          }
+        },
+        {
+          "id": "m09",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "How many store sales have been made in total? Return a single number.",
+          "sql": "SELECT COUNT(*) FROM StoreSale"
+        },
+        {
+          "id": "m10",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "What is Mega's total store revenue (sum of MegaRevenue)? Return a single number.",
+          "sql": "SELECT SUM(MegaRevenue) FROM StoreSale"
+        },
+        {
+          "id": "m11",
+          "topic": "aggregate",
+          "difficulty": 3,
+          "text": "What is the average rating for game {{gid}}, rounded to 2 decimals? Return a single number.",
+          "sql": "SELECT ROUND(AVG(Rating), 2) FROM Review WHERE GameID = {{gid}}",
+          "params": {
+            "gid": {
+              "from": "SELECT DISTINCT GameID FROM Review"
+            }
+          }
+        },
+        {
+          "id": "m12",
+          "topic": "aggregate",
+          "difficulty": 3,
+          "text": "What is the total credit limit extended across all open accounts? Return a single number.",
+          "sql": "SELECT SUM(CreditLimit) FROM CreditAccount WHERE Status = 'Open'"
+        },
+        {
+          "id": "m13",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each genre ID, show the genre ID and the number of games.",
+          "sql": "SELECT GenreID, COUNT(*) FROM Game GROUP BY GenreID"
+        },
+        {
+          "id": "m14",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each game ID, show the game ID and the total price paid across its sales.",
+          "sql": "SELECT GameID, SUM(PricePaid) FROM StoreSale GROUP BY GameID"
+        },
+        {
+          "id": "m15",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each payment method, show the method and the number of hardware orders.",
+          "sql": "SELECT PaymentMethod, COUNT(*) FROM HardwareOrder GROUP BY PaymentMethod"
+        },
+        {
+          "id": "m16",
+          "topic": "group-by",
+          "difficulty": 4,
+          "text": "Show Mega's store revenue per month (SaleMonth) in chronological order.",
+          "sql": "SELECT SaleMonth, SUM(MegaRevenue) FROM StoreSale GROUP BY SaleMonth ORDER BY SaleMonth",
+          "orderMatters": true
+        },
+        {
+          "id": "m17",
+          "topic": "group-by",
+          "difficulty": 4,
+          "text": "For each transaction type, show the type and the total amount, considering only account {{acc}}.",
+          "sql": "SELECT TxnType, SUM(Amount) FROM CreditTransaction WHERE AccountID = {{acc}} GROUP BY TxnType",
+          "params": {
+            "acc": {
+              "from": "SELECT DISTINCT AccountID FROM CreditTransaction"
+            }
+          }
+        },
+        {
+          "id": "m18",
+          "topic": "having",
+          "difficulty": 4,
+          "text": "Show the game IDs with an average rating of at least {{r}}, with the average rounded to 2 decimals (games with at least 5 reviews only).",
+          "sql": "SELECT GameID, ROUND(AVG(Rating), 2) FROM Review GROUP BY GameID HAVING COUNT(*) >= 5 AND AVG(Rating) >= {{r}}",
+          "params": {
+            "r": {
+              "values": [
+                3,
+                3.5,
+                4
+              ]
+            }
+          },
+          "hints": [
+            "Two conditions in HAVING: COUNT(*) and AVG(Rating)."
+          ]
+        },
+        {
+          "id": "m19",
+          "topic": "having",
+          "difficulty": 4,
+          "text": "Show the customer IDs that placed more than {{n}} hardware orders, with the count.",
+          "sql": "SELECT CustomerID, COUNT(*) FROM HardwareOrder GROUP BY CustomerID HAVING COUNT(*) > {{n}}",
+          "params": {
+            "n": {
+              "values": [
+                2,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": "m20",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List each game's title with its studio's name.",
+          "sql": "SELECT G.Title, S.StudioName FROM Game G JOIN Studio S ON G.StudioID = S.StudioID"
+        },
+        {
+          "id": "m21",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List the title and genre name of every game in the '{{genre}}' genre.",
+          "sql": "SELECT G.Title, GE.GenreName FROM Game G JOIN Genre GE ON G.GenreID = GE.GenreID WHERE GE.GenreName = '{{genre}}'",
+          "params": {
+            "genre": {
+              "from": "SELECT GenreName FROM Genre"
+            }
+          }
+        },
+        {
+          "id": "m22",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List the product name, quantity and unit price paid for every line of hardware order {{oid}}.",
+          "sql": "SELECT H.ProductName, L.Quantity, L.UnitPricePaid FROM HardwareOrderLine L JOIN HardwareProduct H ON L.HardwareID = H.HardwareID WHERE L.OrderID = {{oid}}",
+          "params": {
+            "oid": {
+              "from": "SELECT OrderID FROM HardwareOrder"
+            }
+          }
+        },
+        {
+          "id": "m23",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For each studio name, show the name and the total Mega revenue from sales of its games.",
+          "sql": "SELECT S.StudioName, SUM(SS.MegaRevenue) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Studio S ON G.StudioID = S.StudioID GROUP BY S.StudioName"
+        },
+        {
+          "id": "m24",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For each genre name, show the name and the number of store sales.",
+          "sql": "SELECT GE.GenreName, COUNT(*) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Genre GE ON G.GenreID = GE.GenreID GROUP BY GE.GenreName"
+        },
+        {
+          "id": "m25",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "List the titles of games available on the platform named '{{plat}}'.",
+          "sql": "SELECT G.Title FROM GamePlatform GP JOIN Game G ON GP.GameID = G.GameID JOIN Platform P ON GP.PlatformID = P.PlatformID WHERE P.PlatformName = '{{plat}}'",
+          "params": {
+            "plat": {
+              "from": "SELECT PlatformName FROM Platform"
+            }
+          }
+        },
+        {
+          "id": "m26",
+          "topic": "multi-join",
+          "difficulty": 5,
+          "text": "For each hardware product name, show the name and the total revenue (sum of quantity \u00d7 unit price paid).",
+          "sql": "SELECT H.ProductName, SUM(L.Quantity * L.UnitPricePaid) FROM HardwareOrderLine L JOIN HardwareProduct H ON L.HardwareID = H.HardwareID GROUP BY H.ProductName",
+          "hints": [
+            "Multiply inside SUM()."
+          ]
+        },
+        {
+          "id": "m27",
+          "topic": "multi-join",
+          "difficulty": 5,
+          "text": "For each customer who holds a credit account, show the username and the total amount charged (transactions of type 'Charge').",
+          "sql": "SELECT C.Username, SUM(T.Amount) FROM CreditTransaction T JOIN CreditAccount A ON T.AccountID = A.AccountID JOIN Customer C ON A.CustomerID = C.CustomerID WHERE T.TxnType = 'Charge' GROUP BY C.CustomerID, C.Username"
+        },
+        {
+          "id": "m28",
+          "topic": "multi-join",
+          "difficulty": 5,
+          "text": "Show the total Mega revenue from third-party games (games not published by Mega) per studio country.",
+          "sql": "SELECT S.Country, SUM(SS.MegaRevenue) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Studio S ON G.StudioID = S.StudioID WHERE G.PublishedByMega = 0 GROUP BY S.Country"
+        },
+        {
+          "id": "m29",
+          "topic": "alias",
+          "difficulty": 3,
+          "text": "For every hardware product, show its name and its gross margin per unit (unit price minus unit cost), rounded to 2 decimals.",
+          "sql": "SELECT ProductName, ROUND(UnitPrice - UnitCost, 2) AS Margin FROM HardwareProduct"
+        },
+        {
+          "id": "m30",
+          "topic": "alias",
+          "difficulty": 4,
+          "text": "For every store sale, show the sale ID and the amount that goes to the third-party developer (price paid minus Mega revenue), rounded to 2 decimals, for sales where that amount is greater than zero.",
+          "sql": "SELECT SaleID, ROUND(PricePaid - MegaRevenue, 2) AS DevShare FROM StoreSale WHERE PricePaid - MegaRevenue > 0"
+        },
+        {
+          "id": "m31",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the titles of games that have never been sold in the store.",
+          "sql": "SELECT Title FROM Game WHERE GameID NOT IN (SELECT GameID FROM StoreSale)"
+        },
+        {
+          "id": "m32",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the title and list price of games priced above the average list price.",
+          "sql": "SELECT Title, ListPrice FROM Game WHERE ListPrice > (SELECT AVG(ListPrice) FROM Game)"
+        },
+        {
+          "id": "m33",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the usernames of customers who hold a credit account.",
+          "sql": "SELECT Username FROM Customer WHERE CustomerID IN (SELECT CustomerID FROM CreditAccount)"
+        },
+        {
+          "id": "m34",
+          "topic": "subquery",
+          "difficulty": 5,
+          "text": "List the username(s) of the customer(s) with the highest credit limit.",
+          "sql": "SELECT C.Username FROM Customer C JOIN CreditAccount A ON C.CustomerID = A.CustomerID WHERE A.CreditLimit = (SELECT MAX(CreditLimit) FROM CreditAccount)"
+        },
+        {
+          "id": "m35",
+          "topic": "exists",
+          "difficulty": 5,
+          "text": "List the usernames of customers who have bought a game but never reviewed any game.",
+          "sql": "SELECT Username FROM Customer C WHERE EXISTS (SELECT 1 FROM StoreSale S WHERE S.CustomerID = C.CustomerID) AND NOT EXISTS (SELECT 1 FROM Review R WHERE R.CustomerID = C.CustomerID)"
+        },
+        {
+          "id": "m36",
+          "topic": "set-ops",
+          "difficulty": 4,
+          "text": "List, in one column without duplicates, every country that is either a customer's country or a studio's country.",
+          "sql": "SELECT Country FROM Customer UNION SELECT Country FROM Studio"
+        },
+        {
+          "id": "m37",
+          "topic": "set-ops",
+          "difficulty": 4,
+          "text": "List the countries that have both customers and studios.",
+          "sql": "SELECT Country FROM Customer INTERSECT SELECT Country FROM Studio"
+        },
+        {
+          "id": "m38",
+          "topic": "set-ops",
+          "difficulty": 5,
+          "text": "List the customer IDs of customers who have placed a hardware order but have never bought a game in the store.",
+          "sql": "SELECT CustomerID FROM HardwareOrder EXCEPT SELECT CustomerID FROM StoreSale"
+        },
+        {
+          "id": "m39",
+          "topic": "outer-join",
+          "difficulty": 4,
+          "text": "List every studio name with the number of games it has in our catalog, including studios with zero.",
+          "sql": "SELECT S.StudioName, COUNT(G.GameID) FROM Studio S LEFT JOIN Game G ON S.StudioID = G.StudioID GROUP BY S.StudioID, S.StudioName"
+        },
+        {
+          "id": "m40",
+          "topic": "outer-join",
+          "difficulty": 5,
+          "text": "List every hardware product name with its total units sold, including products never sold (0).",
+          "sql": "SELECT H.ProductName, COALESCE(SUM(L.Quantity), 0) FROM HardwareProduct H LEFT JOIN HardwareOrderLine L ON H.HardwareID = L.HardwareID GROUP BY H.HardwareID, H.ProductName",
+          "hints": [
+            "SUM over no rows is NULL; wrap it in COALESCE(..., 0)."
+          ]
+        },
+        {
+          "id": "m41",
+          "topic": "null",
+          "difficulty": 3,
+          "text": "How many credit transactions are not linked to any order? Return a single number.",
+          "sql": "SELECT COUNT(*) FROM CreditTransaction WHERE OrderID IS NULL"
+        },
+        {
+          "id": "m42",
+          "topic": "multi-join",
+          "difficulty": 5,
+          "text": "For each credit account, show the account ID and its outstanding balance: charges plus fees minus payments. Only accounts with a positive balance.",
+          "sql": "SELECT AccountID, SUM(CASE WHEN TxnType = 'Payment' THEN -Amount ELSE Amount END) FROM CreditTransaction GROUP BY AccountID HAVING SUM(CASE WHEN TxnType = 'Payment' THEN -Amount ELSE Amount END) > 0",
+          "hints": [
+            "A CASE expression inside SUM turns payments negative.",
+            "Filter the aggregate with HAVING."
+          ]
+        }
+      ]
+    }
+  ],
+  "presentation": [
+    {
+      "id": "mega-p1-revenue",
+      "company": "mega",
+      "title": "Total store revenue",
+      "difficulty": 1,
+      "database": "mega",
+      "brief": "The CFO wants one headline number: total Mega revenue from the store (Mega's share, not gross sales).",
+      "hints": [
+        "Card; sum MegaRevenue, not PricePaid."
+      ],
+      "expected": {
+        "types": [
+          "card"
+        ],
+        "values": [
+          {
+            "field": {
+              "table": "StoreSale",
+              "column": "MegaRevenue"
+            },
+            "agg": "sum"
+          }
+        ]
+      },
+      "referenceSql": "SELECT SUM(MegaRevenue) FROM StoreSale"
+    },
+    {
+      "id": "mega-p2-genre",
+      "company": "mega",
+      "title": "Revenue by genre",
+      "difficulty": 2,
+      "database": "mega",
+      "brief": "Publishing wants to know which genres earn Mega the most: total Mega revenue per genre name, largest first, with a title.",
+      "hints": [
+        "Three tables: StoreSale \u2192 Game \u2192 Genre. The model joins them."
+      ],
+      "expected": {
+        "types": [
+          "clusteredBar",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "Genre",
+          "column": "GenreName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "StoreSale",
+              "column": "MegaRevenue"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT GE.GenreName, SUM(SS.MegaRevenue) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Genre GE ON G.GenreID = GE.GenreID GROUP BY GE.GenreName ORDER BY 2 DESC"
+    },
+    {
+      "id": "mega-p3-monthly",
+      "company": "mega",
+      "title": "Store revenue trend",
+      "difficulty": 2,
+      "database": "mega",
+      "brief": "Show Mega's store revenue month by month (SaleMonth) across 2024\u20132025, in order, with a title.",
+      "hints": [
+        "Line chart, sorted by axis."
+      ],
+      "expected": {
+        "types": [
+          "line"
+        ],
+        "axis": {
+          "table": "StoreSale",
+          "column": "SaleMonth"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "StoreSale",
+              "column": "MegaRevenue"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "axis",
+          "dir": "asc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT SaleMonth, SUM(MegaRevenue) FROM StoreSale GROUP BY SaleMonth ORDER BY 1"
+    },
+    {
+      "id": "mega-p4-third-party",
+      "company": "mega",
+      "title": "Third-party partners",
+      "difficulty": 4,
+      "database": "mega",
+      "brief": "The store team wants to see how much gross sales (price paid) each external studio generates, third-party games only (PublishedByMega = 0), by studio name, largest first, with a title.",
+      "hints": [
+        "Filter on Game.PublishedByMega = 0; sum PricePaid (gross), not MegaRevenue."
+      ],
+      "expected": {
+        "types": [
+          "clusteredBar",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "Studio",
+          "column": "StudioName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "StoreSale",
+              "column": "PricePaid"
+            },
+            "agg": "sum"
+          }
+        ],
+        "filters": [
+          {
+            "field": {
+              "table": "Game",
+              "column": "PublishedByMega"
+            },
+            "op": "in",
+            "values": [
+              0
+            ]
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT S.StudioName, SUM(SS.PricePaid) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Studio S ON G.StudioID = S.StudioID WHERE G.PublishedByMega = 0 GROUP BY S.StudioName ORDER BY 2 DESC"
+    },
+    {
+      "id": "mega-p5-hardware-by-country",
+      "company": "mega",
+      "title": "Hardware units by country and type",
+      "difficulty": 4,
+      "database": "mega",
+      "brief": "Hardware wants to see units sold (sum of Quantity) per shipping country, broken down by hardware type, in one visual with a title.",
+      "hints": [
+        "ShipCountry on the axis, HardwareType in the legend, Sum of Quantity as the value.",
+        "Stacked columns keep totals readable."
+      ],
+      "expected": {
+        "types": [
+          "stackedColumn",
+          "clusteredColumn",
+          "clusteredBar"
+        ],
+        "axis": {
+          "table": "HardwareOrder",
+          "column": "ShipCountry"
+        },
+        "legend": {
+          "table": "HardwareProduct",
+          "column": "HardwareType"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "HardwareOrderLine",
+              "column": "Quantity"
+            },
+            "agg": "sum"
+          }
+        ],
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT O.ShipCountry, H.HardwareType, SUM(L.Quantity) FROM HardwareOrderLine L JOIN HardwareOrder O ON L.OrderID = O.OrderID JOIN HardwareProduct H ON L.HardwareID = H.HardwareID GROUP BY O.ShipCountry, H.HardwareType ORDER BY 3 DESC"
+    },
+    {
+      "id": "mega-p6-credit",
+      "company": "mega",
+      "title": "Credit exposure",
+      "difficulty": 4,
+      "database": "mega",
+      "brief": "Finance is nervous. Show the total amount of credit transactions per transaction type (Charge, Payment, Fee), with a title. Then, in the same visual, restrict it to accounts with status 'Open'.",
+      "hints": [
+        "TxnType on the axis, Sum of Amount as the value, a filter on CreditAccount.Status."
+      ],
+      "expected": {
+        "types": [
+          "clusteredColumn",
+          "clusteredBar"
+        ],
+        "axis": {
+          "table": "CreditTransaction",
+          "column": "TxnType"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "CreditTransaction",
+              "column": "Amount"
+            },
+            "agg": "sum"
+          }
+        ],
+        "filters": [
+          {
+            "field": {
+              "table": "CreditAccount",
+              "column": "Status"
+            },
+            "op": "in",
+            "values": [
+              "Open"
+            ]
+          }
+        ],
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT T.TxnType, SUM(T.Amount) FROM CreditTransaction T JOIN CreditAccount A ON T.AccountID = A.AccountID WHERE A.Status = 'Open' GROUP BY T.TxnType ORDER BY 2 DESC"
+    },
+    {
+      "id": "mega-p7-ratings-table",
+      "company": "mega",
+      "title": "Ratings table",
+      "difficulty": 3,
+      "database": "mega",
+      "brief": "The community team wants a table: each game title with its average rating, best-rated first.",
+      "hints": [
+        "Table visual; Average of Rating; sort by value descending."
+      ],
+      "expected": {
+        "types": [
+          "table"
+        ],
+        "columns": [
+          {
+            "table": "Game",
+            "column": "Title"
+          }
+        ],
+        "values": [
+          {
+            "field": {
+              "table": "Review",
+              "column": "Rating"
+            },
+            "agg": "avg"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        }
+      },
+      "referenceSql": "SELECT G.Title, AVG(R.Rating) FROM Review R JOIN Game G ON R.GameID = G.GameID GROUP BY G.Title ORDER BY 2 DESC"
+    },
+    {
+      "id": "mega-p8-platforms",
+      "company": "mega",
+      "title": "Catalog by platform",
+      "difficulty": 3,
+      "database": "mega",
+      "brief": "How many games are on each platform? Show the count of games per platform name as parts of a whole, with a title.",
+      "hints": [
+        "Four platforms: a pie or donut is fine. Count GameID from GamePlatform."
+      ],
+      "expected": {
+        "types": [
+          "pie",
+          "donut",
+          "clusteredBar",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "Platform",
+          "column": "PlatformName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "GamePlatform",
+              "column": "GameID"
+            },
+            "agg": [
+              "count",
+              "countDistinct"
+            ]
+          }
+        ],
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT P.PlatformName, COUNT(GP.GameID) FROM GamePlatform GP JOIN Platform P ON GP.PlatformID = P.PlatformID GROUP BY P.PlatformName ORDER BY 2 DESC"
+    }
+  ]
+}

@@ -1,0 +1,1747 @@
+{
+  "format": "db-analyst-simulator/pack@1",
+  "id": "utt-challenges",
+  "title": "Ulysses Tech Tips (jobs)",
+  "design": [
+    {
+      "id": "utt-sponsorship-desk",
+      "company": "utt",
+      "title": "The sponsorship desk",
+      "difficulty": 2,
+      "brief": "Yvonne, the COO, wants the sponsorship desk off spreadsheets. Here is how sponsorships work at Ulysses Tech Tips.\n\nA SPONSOR is a company that pays to appear in videos. For each sponsor we keep a sponsor ID (unique), the company name, its industry, and one or more contact email addresses.\n\nSome sponsors come to us through an AGENCY. An agency has an agency ID (unique), a name, and a commission rate. An agency represents many sponsors (or none yet); a sponsor is represented by at most one agency, and many sponsors deal with us directly with no agency at all.\n\nEach VIDEO we publish has a video ID (unique), a title, a publish date, and a view count.\n\nA sponsor buys slots in videos: a sponsor may appear in many videos or none, and a video may carry many sponsors or none. For each sponsor-in-video pairing we record the fee paid and the placement (pre-roll or mid-roll).",
+      "hints": [
+        "'One or more contact email addresses' is a multivalued attribute.",
+        "'At most one agency ... many with no agency at all' makes the AGENCY side optional.",
+        "Sponsor-in-video is M:N with attributes; those attributes belong on the relationship and end up in the bridge table."
+      ],
+      "er": {
+        "entities": [
+          {
+            "name": "SPONSOR",
+            "attributes": [
+              {
+                "name": "SponsorID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "SponsorName",
+                "aliases": [
+                  "Name",
+                  "CompanyName"
+                ]
+              },
+              {
+                "name": "Industry"
+              },
+              {
+                "name": "ContactEmail",
+                "aliases": [
+                  "Email",
+                  "ContactEmails",
+                  "Emails"
+                ],
+                "multivalued": true
+              }
+            ]
+          },
+          {
+            "name": "AGENCY",
+            "attributes": [
+              {
+                "name": "AgencyID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "AgencyName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "CommissionRate",
+                "aliases": [
+                  "Commission",
+                  "Rate",
+                  "CommissionPct"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "VIDEO",
+            "attributes": [
+              {
+                "name": "VideoID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "VideoTitle",
+                  "Name"
+                ]
+              },
+              {
+                "name": "PublishDate",
+                "aliases": [
+                  "Date",
+                  "Published"
+                ]
+              },
+              {
+                "name": "Views",
+                "aliases": [
+                  "ViewCount"
+                ]
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "name": "Represents",
+            "aliases": [
+              "RepresentedBy",
+              "Has",
+              "Brings",
+              "Manages"
+            ],
+            "sides": [
+              {
+                "entity": "AGENCY",
+                "max": "1",
+                "min": "optional"
+              },
+              {
+                "entity": "SPONSOR",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "A sponsor has at most one agency and often none; an agency represents many sponsors or none."
+          },
+          {
+            "name": "Sponsors",
+            "aliases": [
+              "AppearsIn",
+              "Sponsorship",
+              "Buys",
+              "SponsoredBy",
+              "Slot"
+            ],
+            "sides": [
+              {
+                "entity": "SPONSOR",
+                "max": "M",
+                "min": "optional"
+              },
+              {
+                "entity": "VIDEO",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "attributes": [
+              {
+                "name": "Fee",
+                "aliases": [
+                  "Price",
+                  "Amount"
+                ]
+              },
+              {
+                "name": "Placement",
+                "aliases": [
+                  "Slot",
+                  "Position"
+                ]
+              }
+            ],
+            "rationale": "Many-to-many, optional both ways, with Fee and Placement on the relationship."
+          }
+        ]
+      },
+      "schema": {
+        "tables": [
+          {
+            "name": "AGENCY",
+            "columns": [
+              {
+                "name": "AgencyID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "AgencyName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "CommissionRate",
+                "aliases": [
+                  "Commission",
+                  "Rate"
+                ]
+              }
+            ],
+            "pk": [
+              "AgencyID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "SPONSOR",
+            "columns": [
+              {
+                "name": "SponsorID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "SponsorName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Industry"
+              },
+              {
+                "name": "AgencyID",
+                "nullable": true
+              }
+            ],
+            "pk": [
+              "SponsorID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "AgencyID"
+                ],
+                "refTable": "AGENCY"
+              }
+            ]
+          },
+          {
+            "name": "SPONSOR_EMAIL",
+            "aliases": [
+              "SponsorEmail",
+              "SponsorContact",
+              "ContactEmail",
+              "Contact",
+              "SponsorContactEmail"
+            ],
+            "note": "The multivalued ContactEmail attribute becomes its own table.",
+            "columns": [
+              {
+                "name": "SponsorID"
+              },
+              {
+                "name": "ContactEmail",
+                "aliases": [
+                  "Email"
+                ]
+              }
+            ],
+            "pk": [
+              "SponsorID",
+              "ContactEmail"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "SponsorID"
+                ],
+                "refTable": "SPONSOR"
+              }
+            ]
+          },
+          {
+            "name": "VIDEO",
+            "columns": [
+              {
+                "name": "VideoID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "PublishDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Views"
+              }
+            ],
+            "pk": [
+              "VideoID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "SPONSORSHIP",
+            "aliases": [
+              "Sponsors",
+              "VideoSponsor",
+              "SponsorVideo",
+              "Slot",
+              "SponsorshipDeal",
+              "Deal"
+            ],
+            "note": "The M:N Sponsors relationship becomes a bridge table holding Fee and Placement.",
+            "columns": [
+              {
+                "name": "SponsorID"
+              },
+              {
+                "name": "VideoID"
+              },
+              {
+                "name": "Fee",
+                "aliases": [
+                  "Amount",
+                  "Price"
+                ]
+              },
+              {
+                "name": "Placement",
+                "aliases": [
+                  "Slot"
+                ]
+              }
+            ],
+            "pk": [
+              "SponsorID",
+              "VideoID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "SponsorID"
+                ],
+                "refTable": "SPONSOR"
+              },
+              {
+                "columns": [
+                  "VideoID"
+                ],
+                "refTable": "VIDEO"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "SPONSOR.AgencyID must allow NULL. (The production database uses a surrogate SponsorshipID instead of the composite key; both are valid designs.)"
+        ]
+      },
+      "ddl": {
+        "tests": [
+          {
+            "description": "An agency and a represented sponsor insert cleanly.",
+            "sql": "INSERT INTO AGENCY (AgencyID, AgencyName, CommissionRate) VALUES (1, 'Northstar Media', 15); INSERT INTO SPONSOR (SponsorID, SponsorName, Industry, AgencyID) VALUES (1, 'NordVault VPN', 'Software', 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "A sponsor with no agency is allowed (NULL).",
+            "sql": "INSERT INTO SPONSOR (SponsorID, SponsorName, Industry, AgencyID) VALUES (2, 'SquareSpice', 'Software', NULL)",
+            "expect": "ok"
+          },
+          {
+            "description": "Two email addresses for the same sponsor are allowed.",
+            "sql": "INSERT INTO SPONSOR_EMAIL (SponsorID, ContactEmail) VALUES (1, 'ads@nordvault.example'); INSERT INTO SPONSOR_EMAIL (SponsorID, ContactEmail) VALUES (1, 'partners@nordvault.example')",
+            "expect": "ok"
+          },
+          {
+            "description": "The same email twice for the same sponsor is rejected.",
+            "sql": "INSERT INTO SPONSOR_EMAIL (SponsorID, ContactEmail) VALUES (1, 'ads@nordvault.example')",
+            "expect": "error"
+          },
+          {
+            "description": "A sponsorship in an existing video works.",
+            "sql": "INSERT INTO VIDEO (VideoID, Title, PublishDate, Views) VALUES (10, 'RTX 5090 Review', '2025-02-01', 1200000); INSERT INTO SPONSORSHIP (SponsorID, VideoID, Fee, Placement) VALUES (1, 10, 42000, 'Pre-roll')",
+            "expect": "ok"
+          },
+          {
+            "description": "A sponsorship for a non-existent video is rejected.",
+            "sql": "INSERT INTO SPONSORSHIP (SponsorID, VideoID, Fee, Placement) VALUES (2, 999, 1000, 'Mid-roll')",
+            "expect": "error"
+          },
+          {
+            "description": "A sponsor representing itself under a non-existent agency is rejected.",
+            "sql": "INSERT INTO SPONSOR (SponsorID, SponsorName, Industry, AgencyID) VALUES (3, 'Ghost Co', 'Other', 77)",
+            "expect": "error"
+          }
+        ]
+      }
+    },
+    {
+      "id": "utt-production-floor",
+      "company": "utt",
+      "title": "The production floor",
+      "difficulty": 3,
+      "brief": "Ulysses Tech Tips needs a database for the people, the channels, and the products that make its videos.\n\nEvery EMPLOYEE has an employee ID (unique), a name, a job title, a hire date, and an annual salary. Each employee works in exactly one DEPARTMENT; a department has many employees or none yet. A department has a department ID (unique) and a name. Every employee except the founder reports to exactly one other employee, their manager; a manager may manage many employees.\n\nThe company runs several CHANNELS. A channel has a channel ID (unique), a name, a subscriber count, and a launch year.\n\nEach VIDEO has a video ID (unique), a title, a publish date, a duration in minutes, and a view count. A video is published on exactly one channel, and a channel has many videos (a freshly launched channel may have none). Every video has exactly one employee as its host; an employee may host many videos or none.\n\nThe lab reviews PRODUCTS. A product has a product ID (unique), a name, a category, and a manufacturer's suggested retail price (MSRP). Each product is made by exactly one MANUFACTURER, which has a manufacturer ID (unique), a name, and a country; a manufacturer makes many products (or none we have reviewed yet).\n\nA video may feature many products or none, and a product may be featured in many videos or none. For each product featured in a video we record the verdict given (recommended, mixed, or not recommended).",
+      "hints": [
+        "'Reports to exactly one other employee' is a unary 1:M relationship on EMPLOYEE; the founder makes the manager side optional.",
+        "Host and Works-in are two different 1:M relationships involving EMPLOYEE.",
+        "The M:N between VIDEO and PRODUCT carries the Verdict attribute.",
+        "In the schema, the unary relationship becomes a nullable ManagerID column referencing EMPLOYEE itself."
+      ],
+      "er": {
+        "entities": [
+          {
+            "name": "DEPARTMENT",
+            "aliases": [
+              "Dept"
+            ],
+            "attributes": [
+              {
+                "name": "DeptID",
+                "aliases": [
+                  "DepartmentID",
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "DeptName",
+                "aliases": [
+                  "Name",
+                  "DepartmentName"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "EMPLOYEE",
+            "attributes": [
+              {
+                "name": "EmpID",
+                "aliases": [
+                  "EmployeeID",
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "EmpName",
+                "aliases": [
+                  "Name",
+                  "EmployeeName"
+                ]
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "JobTitle",
+                  "Position"
+                ]
+              },
+              {
+                "name": "HireDate",
+                "aliases": [
+                  "Hired"
+                ]
+              },
+              {
+                "name": "AnnualSalary",
+                "aliases": [
+                  "Salary"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "CHANNEL",
+            "attributes": [
+              {
+                "name": "ChannelID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "ChannelName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Subscribers",
+                "aliases": [
+                  "SubscriberCount",
+                  "Subs"
+                ]
+              },
+              {
+                "name": "LaunchYear",
+                "aliases": [
+                  "Launched",
+                  "Year"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "VIDEO",
+            "attributes": [
+              {
+                "name": "VideoID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "VideoTitle",
+                  "Name"
+                ]
+              },
+              {
+                "name": "PublishDate",
+                "aliases": [
+                  "Date",
+                  "Published"
+                ]
+              },
+              {
+                "name": "DurationMin",
+                "aliases": [
+                  "Duration",
+                  "Length",
+                  "Minutes"
+                ]
+              },
+              {
+                "name": "Views",
+                "aliases": [
+                  "ViewCount"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "PRODUCT",
+            "attributes": [
+              {
+                "name": "ProductID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "ProductName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Category"
+              },
+              {
+                "name": "MSRP",
+                "aliases": [
+                  "Price",
+                  "RetailPrice",
+                  "SuggestedPrice"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "MANUFACTURER",
+            "aliases": [
+              "Maker",
+              "Brand"
+            ],
+            "attributes": [
+              {
+                "name": "ManufacturerID",
+                "aliases": [
+                  "ID",
+                  "MakerID"
+                ],
+                "key": true
+              },
+              {
+                "name": "ManufacturerName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Country"
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "name": "WorksIn",
+            "aliases": [
+              "BelongsTo",
+              "Employs",
+              "In",
+              "Has",
+              "AssignedTo"
+            ],
+            "sides": [
+              {
+                "entity": "DEPARTMENT",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "EMPLOYEE",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each employee is in exactly one department; a department has many employees or none."
+          },
+          {
+            "name": "Manages",
+            "aliases": [
+              "ReportsTo",
+              "Supervises",
+              "ManagedBy"
+            ],
+            "sides": [
+              {
+                "entity": "EMPLOYEE",
+                "max": "1",
+                "min": "optional",
+                "role": "manager"
+              },
+              {
+                "entity": "EMPLOYEE",
+                "max": "M",
+                "min": "optional",
+                "role": "report"
+              }
+            ],
+            "rationale": "Unary 1:M: every employee has at most one manager (the founder has none); a manager has many reports or none."
+          },
+          {
+            "name": "PublishedOn",
+            "aliases": [
+              "On",
+              "Publishes",
+              "Hosts",
+              "Carries",
+              "Has"
+            ],
+            "sides": [
+              {
+                "entity": "CHANNEL",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "VIDEO",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each video is on exactly one channel; a channel has many videos or none."
+          },
+          {
+            "name": "Hosts",
+            "aliases": [
+              "HostedBy",
+              "Presents",
+              "Host"
+            ],
+            "sides": [
+              {
+                "entity": "EMPLOYEE",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "VIDEO",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each video has exactly one host; an employee hosts many videos or none."
+          },
+          {
+            "name": "Makes",
+            "aliases": [
+              "MadeBy",
+              "Manufactures",
+              "Produces",
+              "Has"
+            ],
+            "sides": [
+              {
+                "entity": "MANUFACTURER",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "PRODUCT",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "rationale": "Each product has exactly one manufacturer; a manufacturer makes many products or none."
+          },
+          {
+            "name": "Features",
+            "aliases": [
+              "Reviews",
+              "Shows",
+              "FeaturedIn",
+              "AppearsIn",
+              "Covers"
+            ],
+            "sides": [
+              {
+                "entity": "VIDEO",
+                "max": "M",
+                "min": "optional"
+              },
+              {
+                "entity": "PRODUCT",
+                "max": "M",
+                "min": "optional"
+              }
+            ],
+            "attributes": [
+              {
+                "name": "Verdict",
+                "aliases": [
+                  "Rating",
+                  "Recommendation",
+                  "Result"
+                ]
+              }
+            ],
+            "rationale": "Many-to-many, optional both ways, with Verdict on the relationship."
+          }
+        ]
+      },
+      "schema": {
+        "tables": [
+          {
+            "name": "DEPARTMENT",
+            "aliases": [
+              "Dept"
+            ],
+            "columns": [
+              {
+                "name": "DeptID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "DeptName",
+                "aliases": [
+                  "Name"
+                ]
+              }
+            ],
+            "pk": [
+              "DeptID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "EMPLOYEE",
+            "columns": [
+              {
+                "name": "EmpID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "EmpName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "JobTitle"
+                ]
+              },
+              {
+                "name": "HireDate"
+              },
+              {
+                "name": "AnnualSalary",
+                "aliases": [
+                  "Salary"
+                ]
+              },
+              {
+                "name": "DeptID",
+                "aliases": [
+                  "DepartmentID"
+                ]
+              },
+              {
+                "name": "ManagerID",
+                "aliases": [
+                  "Manager",
+                  "ReportsTo",
+                  "SupervisorID",
+                  "ManagerEmpID"
+                ],
+                "nullable": true
+              }
+            ],
+            "pk": [
+              "EmpID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "DeptID"
+                ],
+                "refTable": "DEPARTMENT"
+              },
+              {
+                "columns": [
+                  "ManagerID"
+                ],
+                "refTable": "EMPLOYEE"
+              }
+            ]
+          },
+          {
+            "name": "CHANNEL",
+            "columns": [
+              {
+                "name": "ChannelID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "ChannelName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Subscribers"
+              },
+              {
+                "name": "LaunchYear"
+              }
+            ],
+            "pk": [
+              "ChannelID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "VIDEO",
+            "columns": [
+              {
+                "name": "VideoID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "Title",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "PublishDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "DurationMin",
+                "aliases": [
+                  "Duration",
+                  "Length"
+                ]
+              },
+              {
+                "name": "Views"
+              },
+              {
+                "name": "ChannelID"
+              },
+              {
+                "name": "HostEmpID",
+                "aliases": [
+                  "HostID",
+                  "EmpID",
+                  "Host"
+                ]
+              }
+            ],
+            "pk": [
+              "VideoID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "ChannelID"
+                ],
+                "refTable": "CHANNEL"
+              },
+              {
+                "columns": [
+                  "HostEmpID"
+                ],
+                "refTable": "EMPLOYEE"
+              }
+            ]
+          },
+          {
+            "name": "MANUFACTURER",
+            "aliases": [
+              "Maker",
+              "Brand"
+            ],
+            "columns": [
+              {
+                "name": "ManufacturerID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "ManufacturerName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Country"
+              }
+            ],
+            "pk": [
+              "ManufacturerID"
+            ],
+            "fks": []
+          },
+          {
+            "name": "PRODUCT",
+            "columns": [
+              {
+                "name": "ProductID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "ProductName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "Category"
+              },
+              {
+                "name": "MSRP",
+                "aliases": [
+                  "Price"
+                ]
+              },
+              {
+                "name": "ManufacturerID",
+                "aliases": [
+                  "MakerID"
+                ]
+              }
+            ],
+            "pk": [
+              "ProductID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "ManufacturerID"
+                ],
+                "refTable": "MANUFACTURER"
+              }
+            ]
+          },
+          {
+            "name": "VIDEO_PRODUCT",
+            "aliases": [
+              "VideoProduct",
+              "Features",
+              "Feature",
+              "ProductVideo",
+              "Review",
+              "FeaturedProduct"
+            ],
+            "note": "The M:N Features relationship needs a bridge table that carries Verdict.",
+            "columns": [
+              {
+                "name": "VideoID"
+              },
+              {
+                "name": "ProductID"
+              },
+              {
+                "name": "Verdict",
+                "aliases": [
+                  "Rating",
+                  "Recommendation"
+                ]
+              }
+            ],
+            "pk": [
+              "VideoID",
+              "ProductID"
+            ],
+            "fks": [
+              {
+                "columns": [
+                  "VideoID"
+                ],
+                "refTable": "VIDEO"
+              },
+              {
+                "columns": [
+                  "ProductID"
+                ],
+                "refTable": "PRODUCT"
+              }
+            ]
+          }
+        ],
+        "notes": [
+          "EMPLOYEE.ManagerID references EMPLOYEE and must allow NULL for the founder."
+        ]
+      },
+      "ddl": {
+        "tests": [
+          {
+            "description": "A department, the founder (no manager), and an employee reporting to the founder.",
+            "sql": "INSERT INTO DEPARTMENT (DeptID, DeptName) VALUES (1, 'Admin'); INSERT INTO EMPLOYEE (EmpID, EmpName, Title, HireDate, AnnualSalary, DeptID, ManagerID) VALUES (1, 'Ulysses Sebastian', 'Founder', '2008-11-24', 210000, 1, NULL); INSERT INTO EMPLOYEE (EmpID, EmpName, Title, HireDate, AnnualSalary, DeptID, ManagerID) VALUES (2, 'Yvonne Ho', 'COO', '2013-03-04', 165000, 1, 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "An employee whose manager does not exist is rejected.",
+            "sql": "INSERT INTO EMPLOYEE (EmpID, EmpName, Title, HireDate, AnnualSalary, DeptID, ManagerID) VALUES (3, 'Ghost', 'Editor', '2024-01-01', 50000, 1, 99)",
+            "expect": "error"
+          },
+          {
+            "description": "A channel, a video hosted by an existing employee.",
+            "sql": "INSERT INTO CHANNEL (ChannelID, ChannelName, Subscribers, LaunchYear) VALUES (1, 'Ulysses Tech Tips', 15800000, 2008); INSERT INTO VIDEO (VideoID, Title, PublishDate, DurationMin, Views, ChannelID, HostEmpID) VALUES (1, 'RTX 5090 Review', '2025-02-01', 18, 2400000, 1, 1)",
+            "expect": "ok"
+          },
+          {
+            "description": "A video on a channel that does not exist is rejected.",
+            "sql": "INSERT INTO VIDEO (VideoID, Title, PublishDate, DurationMin, Views, ChannelID, HostEmpID) VALUES (2, 'Nope', '2025-02-02', 10, 0, 9, 1)",
+            "expect": "error"
+          },
+          {
+            "description": "A manufacturer, a product, and a feature with a verdict.",
+            "sql": "INSERT INTO MANUFACTURER (ManufacturerID, ManufacturerName, Country) VALUES (1, 'Envida', 'USA'); INSERT INTO PRODUCT (ProductID, ProductName, Category, MSRP, ManufacturerID) VALUES (1, 'Envida RTX 5090', 'GPU', 1999, 1); INSERT INTO VIDEO_PRODUCT (VideoID, ProductID, Verdict) VALUES (1, 1, 'Recommended')",
+            "expect": "ok"
+          },
+          {
+            "description": "Featuring the same product twice in the same video is rejected (composite PK).",
+            "sql": "INSERT INTO VIDEO_PRODUCT (VideoID, ProductID, Verdict) VALUES (1, 1, 'Mixed')",
+            "expect": "error"
+          },
+          {
+            "description": "A product from a non-existent manufacturer is rejected.",
+            "sql": "INSERT INTO PRODUCT (ProductID, ProductName, Category, MSRP, ManufacturerID) VALUES (2, 'Mystery GPU', 'GPU', 1, 55)",
+            "expect": "error"
+          }
+        ]
+      }
+    }
+  ],
+  "queries": [
+    {
+      "id": "utt-sql",
+      "company": "utt",
+      "title": "Ulysses Tech Tips \u2014 SQL sprint",
+      "database": "utt",
+      "questions": [
+        {
+          "id": "u01",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "List the name and subscriber count of every channel.",
+          "sql": "SELECT ChannelName, Subscribers FROM Channel"
+        },
+        {
+          "id": "u02",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "List the name, title and annual salary of every employee.",
+          "sql": "SELECT EmpName, Title, AnnualSalary FROM Employee"
+        },
+        {
+          "id": "u03",
+          "topic": "select-where",
+          "difficulty": 1,
+          "text": "List the product name and MSRP of products in category '{{cat}}'.",
+          "sql": "SELECT ProductName, MSRP FROM Product WHERE Category = '{{cat}}'",
+          "params": {
+            "cat": {
+              "from": "SELECT DISTINCT Category FROM Product"
+            }
+          }
+        },
+        {
+          "id": "u04",
+          "topic": "select-where",
+          "difficulty": 1,
+          "text": "List the title and views of videos with more than {{v}} views.",
+          "sql": "SELECT Title, Views FROM Video WHERE Views > {{v}}",
+          "params": {
+            "v": {
+              "values": [
+                500000,
+                800000,
+                1000000
+              ]
+            }
+          }
+        },
+        {
+          "id": "u05",
+          "topic": "select-where",
+          "difficulty": 2,
+          "text": "List the name and hire date of employees in department {{d}} hired after {{y}}-12-31.",
+          "sql": "SELECT EmpName, HireDate FROM Employee WHERE DeptID = {{d}} AND HireDate > '{{y}}-12-31'",
+          "params": {
+            "d": {
+              "values": [
+                2,
+                3,
+                4,
+                5
+              ]
+            },
+            "y": {
+              "values": [
+                2015,
+                2018
+              ]
+            }
+          }
+        },
+        {
+          "id": "u06",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List the distinct product categories, alphabetically.",
+          "sql": "SELECT DISTINCT Category FROM Product ORDER BY Category",
+          "orderMatters": true
+        },
+        {
+          "id": "u07",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List every employee's name and salary, highest salary first.",
+          "sql": "SELECT EmpName, AnnualSalary FROM Employee ORDER BY AnnualSalary DESC",
+          "orderMatters": true
+        },
+        {
+          "id": "u08",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List the distinct industries of our sponsors.",
+          "sql": "SELECT DISTINCT Industry FROM Sponsor"
+        },
+        {
+          "id": "u09",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the titles of videos whose title contains the word '{{word}}'.",
+          "sql": "SELECT Title FROM Video WHERE Title LIKE '%{{word}}%'",
+          "params": {
+            "word": {
+              "values": [
+                "Review",
+                "build",
+                "explained",
+                "tested",
+                "Lab"
+              ]
+            }
+          }
+        },
+        {
+          "id": "u10",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the product name and MSRP of products priced between ${{lo}} and ${{hi}} inclusive.",
+          "sql": "SELECT ProductName, MSRP FROM Product WHERE MSRP BETWEEN {{lo}} AND {{hi}}",
+          "params": {
+            "lo": {
+              "values": [
+                100,
+                200,
+                300
+              ]
+            },
+            "hi": {
+              "values": [
+                600,
+                800,
+                1500
+              ]
+            }
+          }
+        },
+        {
+          "id": "u11",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the manufacturer names based in either {{c1}} or {{c2}}.",
+          "sql": "SELECT ManufacturerName FROM Manufacturer WHERE Country IN ('{{c1}}', '{{c2}}')",
+          "params": {
+            "c1": {
+              "values": [
+                "USA",
+                "Taiwan"
+              ]
+            },
+            "c2": {
+              "values": [
+                "South Korea",
+                "Switzerland",
+                "Austria"
+              ]
+            }
+          }
+        },
+        {
+          "id": "u12",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "How many videos have we published in total? Return a single number.",
+          "sql": "SELECT COUNT(*) FROM Video"
+        },
+        {
+          "id": "u13",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "What is the total sponsorship revenue (sum of fees)? Return a single number.",
+          "sql": "SELECT SUM(Fee) FROM Sponsorship"
+        },
+        {
+          "id": "u14",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "What are the longest and shortest video durations in minutes? Return both in one row.",
+          "sql": "SELECT MAX(DurationMin), MIN(DurationMin) FROM Video"
+        },
+        {
+          "id": "u15",
+          "topic": "aggregate",
+          "difficulty": 3,
+          "text": "What is the average salary in department {{d}}, rounded to 2 decimals? Return a single number.",
+          "sql": "SELECT ROUND(AVG(AnnualSalary), 2) FROM Employee WHERE DeptID = {{d}}",
+          "params": {
+            "d": {
+              "values": [
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            }
+          }
+        },
+        {
+          "id": "u16",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each channel ID, show the channel ID and the number of videos.",
+          "sql": "SELECT ChannelID, COUNT(*) FROM Video GROUP BY ChannelID"
+        },
+        {
+          "id": "u17",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each video type, show the type and the average views, rounded to the nearest whole number.",
+          "sql": "SELECT VideoType, ROUND(AVG(Views)) FROM Video GROUP BY VideoType"
+        },
+        {
+          "id": "u18",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "Show sponsorship revenue per placement: the placement and the sum of fees.",
+          "sql": "SELECT Placement, SUM(Fee) FROM Sponsorship GROUP BY Placement"
+        },
+        {
+          "id": "u19",
+          "topic": "group-by",
+          "difficulty": 4,
+          "text": "Show total views per publish month (YYYY-MM), in chronological order.",
+          "sql": "SELECT PublishMonth, SUM(Views) FROM Video GROUP BY PublishMonth ORDER BY PublishMonth",
+          "orderMatters": true
+        },
+        {
+          "id": "u20",
+          "topic": "having",
+          "difficulty": 3,
+          "text": "Show the department IDs with more than {{n}} employees, with the count.",
+          "sql": "SELECT DeptID, COUNT(*) FROM Employee GROUP BY DeptID HAVING COUNT(*) > {{n}}",
+          "params": {
+            "n": {
+              "values": [
+                2,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": "u21",
+          "topic": "having",
+          "difficulty": 4,
+          "text": "Show the sponsor IDs that have paid more than ${{amt}} in total fees, with the total.",
+          "sql": "SELECT SponsorID, SUM(Fee) FROM Sponsorship GROUP BY SponsorID HAVING SUM(Fee) > {{amt}}",
+          "params": {
+            "amt": {
+              "values": [
+                300000,
+                500000,
+                800000
+              ]
+            }
+          }
+        },
+        {
+          "id": "u22",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List each employee's name together with their department name.",
+          "sql": "SELECT E.EmpName, D.DeptName FROM Employee E JOIN Department D ON E.DeptID = D.DeptID"
+        },
+        {
+          "id": "u23",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List each product's name with its manufacturer's name, for manufacturers from {{country}}.",
+          "sql": "SELECT P.ProductName, M.ManufacturerName FROM Product P JOIN Manufacturer M ON P.ManufacturerID = M.ManufacturerID WHERE M.Country = '{{country}}'",
+          "params": {
+            "country": {
+              "from": "SELECT DISTINCT Country FROM Manufacturer"
+            }
+          }
+        },
+        {
+          "id": "u24",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List the title and views of every video on the channel named '{{ch}}'.",
+          "sql": "SELECT V.Title, V.Views FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID WHERE C.ChannelName = '{{ch}}'",
+          "params": {
+            "ch": {
+              "from": "SELECT ChannelName FROM Channel"
+            }
+          }
+        },
+        {
+          "id": "u25",
+          "topic": "self-join",
+          "difficulty": 4,
+          "text": "List each employee's name together with their manager's name (employees without a manager are excluded).",
+          "sql": "SELECT E.EmpName, M.EmpName FROM Employee E JOIN Employee M ON E.ManagerID = M.EmpID",
+          "hints": [
+            "Join Employee to itself with two aliases: one for the employee, one for the manager."
+          ]
+        },
+        {
+          "id": "u26",
+          "topic": "self-join",
+          "difficulty": 5,
+          "text": "For each manager, show the manager's name and how many employees report directly to them.",
+          "sql": "SELECT M.EmpName, COUNT(*) FROM Employee E JOIN Employee M ON E.ManagerID = M.EmpID GROUP BY M.EmpID, M.EmpName"
+        },
+        {
+          "id": "u27",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For each host, show the host's name and the total views of the videos they hosted.",
+          "sql": "SELECT E.EmpName, SUM(V.Views) FROM Video V JOIN Employee E ON V.HostEmpID = E.EmpID GROUP BY E.EmpID, E.EmpName"
+        },
+        {
+          "id": "u28",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For each sponsor name, show the name and total fees paid.",
+          "sql": "SELECT S.SponsorName, SUM(SP.Fee) FROM Sponsorship SP JOIN Sponsor S ON SP.SponsorID = S.SponsorID GROUP BY S.SponsorName"
+        },
+        {
+          "id": "u29",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "List the product name and verdict for every product featured in the video titled '{{title}}'.",
+          "sql": "SELECT P.ProductName, VP.Verdict FROM VideoProduct VP JOIN Product P ON VP.ProductID = P.ProductID JOIN Video V ON VP.VideoID = V.VideoID WHERE V.Title = '{{title}}'",
+          "params": {
+            "title": {
+              "from": "SELECT V.Title FROM Video V JOIN VideoProduct VP ON V.VideoID = VP.VideoID GROUP BY V.VideoID"
+            }
+          }
+        },
+        {
+          "id": "u30",
+          "topic": "multi-join",
+          "difficulty": 5,
+          "text": "For each manufacturer name, show the name and the number of times its products received the verdict '{{verdict}}'.",
+          "sql": "SELECT M.ManufacturerName, COUNT(*) FROM VideoProduct VP JOIN Product P ON VP.ProductID = P.ProductID JOIN Manufacturer M ON P.ManufacturerID = M.ManufacturerID WHERE VP.Verdict = '{{verdict}}' GROUP BY M.ManufacturerName",
+          "params": {
+            "verdict": {
+              "values": [
+                "Recommended",
+                "Mixed",
+                "Not recommended"
+              ]
+            }
+          }
+        },
+        {
+          "id": "u31",
+          "topic": "multi-join",
+          "difficulty": 5,
+          "text": "For each channel name, show the name and the total sponsorship fees earned by its videos.",
+          "sql": "SELECT C.ChannelName, SUM(SP.Fee) FROM Sponsorship SP JOIN Video V ON SP.VideoID = V.VideoID JOIN Channel C ON V.ChannelID = C.ChannelID GROUP BY C.ChannelName"
+        },
+        {
+          "id": "u32",
+          "topic": "alias",
+          "difficulty": 3,
+          "text": "For each video, show its title and its views per minute of duration, rounded to the nearest whole number.",
+          "sql": "SELECT Title, ROUND(Views * 1.0 / DurationMin) AS ViewsPerMinute FROM Video"
+        },
+        {
+          "id": "u33",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the names of employees who earn more than the average salary.",
+          "sql": "SELECT EmpName FROM Employee WHERE AnnualSalary > (SELECT AVG(AnnualSalary) FROM Employee)"
+        },
+        {
+          "id": "u34",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the names of products that have never been featured in a video.",
+          "sql": "SELECT ProductName FROM Product WHERE ProductID NOT IN (SELECT ProductID FROM VideoProduct)"
+        },
+        {
+          "id": "u35",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the names of sponsors who sponsored at least one video on channel {{cid}}.",
+          "sql": "SELECT SponsorName FROM Sponsor WHERE SponsorID IN (SELECT SP.SponsorID FROM Sponsorship SP JOIN Video V ON SP.VideoID = V.VideoID WHERE V.ChannelID = {{cid}})",
+          "params": {
+            "cid": {
+              "values": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          }
+        },
+        {
+          "id": "u36",
+          "topic": "subquery",
+          "difficulty": 5,
+          "text": "List the title(s) of the most-viewed video(s).",
+          "sql": "SELECT Title FROM Video WHERE Views = (SELECT MAX(Views) FROM Video)"
+        },
+        {
+          "id": "u37",
+          "topic": "exists",
+          "difficulty": 5,
+          "text": "List the names of employees who have never hosted a video.",
+          "sql": "SELECT EmpName FROM Employee E WHERE NOT EXISTS (SELECT 1 FROM Video V WHERE V.HostEmpID = E.EmpID)"
+        },
+        {
+          "id": "u38",
+          "topic": "set-ops",
+          "difficulty": 4,
+          "text": "Marketing wants one combined list of 'market segments': every sponsor industry and every product category, in one column, without duplicates.",
+          "sql": "SELECT Industry FROM Sponsor UNION SELECT Category FROM Product",
+          "hints": [
+            "UNION stacks two SELECTs and removes duplicates."
+          ]
+        },
+        {
+          "id": "u39",
+          "topic": "outer-join",
+          "difficulty": 4,
+          "text": "List every sponsor name with the number of sponsorships bought, including sponsors with zero.",
+          "sql": "SELECT S.SponsorName, COUNT(SP.SponsorshipID) FROM Sponsor S LEFT JOIN Sponsorship SP ON S.SponsorID = SP.SponsorID GROUP BY S.SponsorID, S.SponsorName"
+        },
+        {
+          "id": "u40",
+          "topic": "null",
+          "difficulty": 3,
+          "text": "List the name and title of the employee(s) who have no manager.",
+          "sql": "SELECT EmpName, Title FROM Employee WHERE ManagerID IS NULL"
+        }
+      ]
+    }
+  ],
+  "presentation": [
+    {
+      "id": "utt-p1-videos",
+      "company": "utt",
+      "title": "How many videos?",
+      "difficulty": 1,
+      "database": "utt",
+      "brief": "Yvonne wants a single number on the wall: how many videos the company has published in total.",
+      "hints": [
+        "A card with a count of VideoID."
+      ],
+      "expected": {
+        "types": [
+          "card"
+        ],
+        "values": [
+          {
+            "field": {
+              "table": "Video",
+              "column": "VideoID"
+            },
+            "agg": [
+              "count",
+              "countDistinct"
+            ]
+          }
+        ]
+      },
+      "referenceSql": "SELECT COUNT(VideoID) FROM Video"
+    },
+    {
+      "id": "utt-p2-views-by-channel",
+      "company": "utt",
+      "title": "Views by channel",
+      "difficulty": 2,
+      "database": "utt",
+      "brief": "Which channel is pulling the most views? Show total views per channel name, largest first, with a title.",
+      "hints": [
+        "Bars or columns; sort by value descending."
+      ],
+      "expected": {
+        "types": [
+          "clusteredBar",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "Channel",
+          "column": "ChannelName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "Video",
+              "column": "Views"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT C.ChannelName, SUM(V.Views) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID GROUP BY C.ChannelName ORDER BY 2 DESC"
+    },
+    {
+      "id": "utt-p3-sponsor-trend",
+      "company": "utt",
+      "title": "Sponsorship revenue over time",
+      "difficulty": 3,
+      "database": "utt",
+      "brief": "The sponsorship desk wants to see total sponsorship fees per publish month of the sponsored videos, in chronological order, with a title.",
+      "hints": [
+        "Fees live in Sponsorship; the month lives in Video. The model joins them for you.",
+        "Time on the axis: a line chart, sorted by the axis."
+      ],
+      "expected": {
+        "types": [
+          "line"
+        ],
+        "axis": {
+          "table": "Video",
+          "column": "PublishMonth"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "Sponsorship",
+              "column": "Fee"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "axis",
+          "dir": "asc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT V.PublishMonth, SUM(S.Fee) FROM Sponsorship S JOIN Video V ON S.VideoID = V.VideoID GROUP BY V.PublishMonth ORDER BY 1"
+    },
+    {
+      "id": "utt-p4-verdicts",
+      "company": "utt",
+      "title": "Verdicts by manufacturer",
+      "difficulty": 4,
+      "database": "utt",
+      "brief": "The lab wants to know whether it is being too kind to any brand: for each manufacturer name, show how many products were featured, broken down by verdict. One visual, with a title.",
+      "hints": [
+        "Manufacturer on the axis, Verdict as the legend, count of ProductID as the value.",
+        "Stacked or clustered columns both work."
+      ],
+      "expected": {
+        "types": [
+          "stackedColumn",
+          "clusteredColumn",
+          "clusteredBar"
+        ],
+        "axis": {
+          "table": "Manufacturer",
+          "column": "ManufacturerName"
+        },
+        "legend": {
+          "table": "VideoProduct",
+          "column": "Verdict"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "VideoProduct",
+              "column": "ProductID"
+            },
+            "agg": [
+              "count",
+              "countDistinct"
+            ]
+          }
+        ],
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT M.ManufacturerName, VP.Verdict, COUNT(VP.ProductID) FROM VideoProduct VP JOIN Product P ON VP.ProductID = P.ProductID JOIN Manufacturer M ON P.ManufacturerID = M.ManufacturerID GROUP BY M.ManufacturerName, VP.Verdict ORDER BY 3 DESC"
+    },
+    {
+      "id": "utt-p5-salary-table",
+      "company": "utt",
+      "title": "Payroll by department",
+      "difficulty": 3,
+      "database": "utt",
+      "brief": "Finance needs exact figures: a table of each department name with its total annual salary, sorted from the biggest payroll to the smallest.",
+      "hints": [
+        "Table visual; sum AnnualSalary; sort by the value."
+      ],
+      "expected": {
+        "types": [
+          "table"
+        ],
+        "columns": [
+          {
+            "table": "Department",
+            "column": "DeptName"
+          },
+          {
+            "table": "Employee",
+            "column": "AnnualSalary"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        }
+      },
+      "referenceSql": "SELECT D.DeptName, SUM(E.AnnualSalary) FROM Employee E JOIN Department D ON E.DeptID = D.DeptID GROUP BY D.DeptName ORDER BY 2 DESC"
+    },
+    {
+      "id": "utt-p6-main-channel-types",
+      "company": "utt",
+      "title": "What works on the main channel?",
+      "difficulty": 4,
+      "database": "utt",
+      "brief": "For the channel 'Ulysses Tech Tips' only, compare the average views per video type, highest first, with a title.",
+      "hints": [
+        "Filter on ChannelName; use Average of Views, not Sum."
+      ],
+      "expected": {
+        "types": [
+          "clusteredColumn",
+          "clusteredBar"
+        ],
+        "axis": {
+          "table": "Video",
+          "column": "VideoType"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "Video",
+              "column": "Views"
+            },
+            "agg": "avg"
+          }
+        ],
+        "filters": [
+          {
+            "field": {
+              "table": "Channel",
+              "column": "ChannelName"
+            },
+            "op": "in",
+            "values": [
+              "Ulysses Tech Tips"
+            ]
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        },
+        "requireTitle": true
+      },
+      "referenceSql": "SELECT V.VideoType, AVG(V.Views) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID WHERE C.ChannelName = 'Ulysses Tech Tips' GROUP BY V.VideoType ORDER BY 2 DESC"
+    }
+  ]
+}
