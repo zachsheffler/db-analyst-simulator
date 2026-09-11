@@ -4,6 +4,7 @@ import type { ERDiagram, Schema, SchemaColumn, SchemaTable } from './erModel'
 import { nid } from './erModel'
 import { gradeSchema } from '../../lib/schemaGrade'
 import type { Grade } from '../../lib/grade'
+import { useHotkeys } from '../../lib/hotkeys'
 
 const TYPES = ['INT', 'DECIMAL(10,2)', 'VARCHAR(50)', 'VARCHAR(200)', 'CHAR(10)', 'DATE', 'BOOLEAN']
 
@@ -18,11 +19,19 @@ interface Props {
 }
 
 export function SchemaStep({ challenge, notation, schema, onChange, er, onGraded, checkRef }: Props) {
+  const [activeTable, setActiveTable] = useState<string | null>(null)
+  const focusNext = useRef<string | null>(null)
   useEffect(() => {
     checkRef.current = () => onGraded(gradeSchema(schema, challenge, notation).grade)
     return () => {
       checkRef.current = null
     }
+  })
+  useEffect(() => {
+    if (!focusNext.current) return
+    const el = document.querySelector<HTMLInputElement>(`[data-col="${focusNext.current}"]`)
+    focusNext.current = null
+    el?.focus()
   })
   const setTable = (id: string, patch: Partial<SchemaTable>) => onChange({ tables: schema.tables.map((t) => (t.id === id ? { ...t, ...patch } : t)) })
   const setCol = (tid: string, cid: string, patch: Partial<SchemaColumn>) =>
@@ -32,12 +41,25 @@ export function SchemaStep({ challenge, notation, schema, onChange, er, onGraded
   const addTable = (name = '', columns: SchemaColumn[] = []) => {
     const t: SchemaTable = { id: nid('t'), name, columns }
     onChange({ tables: [...schema.tables, t] })
+    setActiveTable(t.id)
+    focusNext.current = `t-${t.id}`
   }
-  const addCol = (tid: string) => {
+  const addCol = (tid: string, after?: string) => {
     const c: SchemaColumn = { id: nid('c'), name: '', type: 'VARCHAR(50)', pk: false, nullable: false, fk: null }
-    onChange({ tables: schema.tables.map((t) => (t.id === tid ? { ...t, columns: [...t.columns, c] } : t)) })
+    onChange({
+      tables: schema.tables.map((t) => {
+        if (t.id !== tid) return t
+        const i = after ? t.columns.findIndex((x) => x.id === after) : -1
+        const columns = [...t.columns]
+        columns.splice(i === -1 ? columns.length : i + 1, 0, c)
+        return { ...t, columns }
+      }),
+    })
+    focusNext.current = c.id
   }
+  const removeCol = (tid: string, cid: string) => setTable(tid, { columns: schema.tables.find((t) => t.id === tid)!.columns.filter((x) => x.id !== cid) })
   const seedFromER = () => {
+    if (schema.tables.length && !confirm('Replace your current tables with one table per ER entity?')) return
     const ents = er.nodes.filter((n) => n.kind === 'entity')
     const tables: SchemaTable[] = ents.map((e) => ({
       id: nid('t'),
@@ -52,23 +74,67 @@ export function SchemaStep({ challenge, notation, schema, onChange, er, onGraded
     }))
     onChange({ tables })
   }
+  const targetTable = () => activeTable && schema.tables.some((t) => t.id === activeTable) ? activeTable : schema.tables[schema.tables.length - 1]?.id ?? null
+
+  useHotkeys('Relational schema', [
+    { keys: 't', label: 'Add table', handler: () => addTable() },
+    { keys: 'c', label: 'Add column to the current (last used) table', handler: () => {
+        const t = targetTable()
+        if (t) addCol(t)
+      },
+      when: () => schema.tables.length > 0,
+    },
+    { keys: 's', label: 'Start from my ER entities', handler: seedFromER, when: () => er.nodes.some((n) => n.kind === 'entity') },
+    { keys: 'escape', label: 'Leave the text box', handler: () => (document.activeElement as HTMLElement | null)?.blur(), inInputs: true },
+  ])
 
   const allColumns = schema.tables.flatMap((t) => t.columns.map((c) => ({ table: t.name, column: c.name, pk: c.pk })))
+
+  // Enter in a column row adds a row below; Ctrl+Delete removes the row
+  const rowKeys = (tid: string, cid: string) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addCol(tid, cid)
+    } else if (e.key === 'Delete' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault()
+      removeCol(tid, cid)
+    }
+  }
 
   return (
     <div className="schema-layout">
       <div>
         <div className="row" style={{ marginBottom: 8 }}>
-          <button onClick={() => addTable()}>+ Table</button>
-          <button onClick={seedFromER} disabled={!er.nodes.some((n) => n.kind === 'entity')} title="Creates one table per entity with its simple attributes. Relationships, multivalued attributes and keys are up to you.">
-            Start from my ER entities
+          <button onClick={() => addTable()}>
+            + Table <kbd>T</kbd>
           </button>
+          <button onClick={seedFromER} disabled={!er.nodes.some((n) => n.kind === 'entity')} title="Creates one table per entity with its simple attributes. Relationships, multivalued attributes and keys are up to you.">
+            Start from my ER entities <kbd>S</kbd>
+          </button>
+          <span className="muted" style={{ fontSize: 12 }}>
+            <kbd>Enter</kbd> in a column adds the next one · <kbd>Ctrl</kbd>+<kbd>Del</kbd> removes it
+          </span>
         </div>
         {schema.tables.map((t) => (
-          <div className="schema-table" key={t.id}>
+          <div className={`schema-table ${activeTable === t.id ? 'active' : ''}`} key={t.id} onFocusCapture={() => setActiveTable(t.id)}>
             <div className="head">
-              <input type="text" placeholder="TABLE_NAME" value={t.name} onChange={(e) => setTable(t.id, { name: e.target.value })} />
-              <button className="small" onClick={() => addCol(t.id)}>
+              <input
+                type="text"
+                placeholder="TABLE_NAME"
+                data-col={`t-${t.id}`}
+                value={t.name}
+                onChange={(e) => setTable(t.id, { name: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    if (t.columns.length) {
+                      focusNext.current = t.columns[0].id
+                      onChange({ ...schema })
+                    } else addCol(t.id)
+                  }
+                }}
+              />
+              <button className="small" onClick={() => addCol(t.id)} title="C">
                 + column
               </button>
               <button className="small danger" onClick={() => onChange({ tables: schema.tables.filter((x) => x.id !== t.id) })}>
@@ -86,18 +152,19 @@ export function SchemaStep({ challenge, notation, schema, onChange, er, onGraded
             </div>
             {t.columns.map((c) => (
               <div className="col" key={c.id}>
-                <input type="text" placeholder="column" value={c.name} onChange={(e) => setCol(t.id, c.id, { name: e.target.value })} />
-                <select value={TYPES.includes(c.type) ? c.type : 'custom'} onChange={(e) => setCol(t.id, c.id, { type: e.target.value })}>
+                <input type="text" placeholder="column" data-col={c.id} value={c.name} onChange={(e) => setCol(t.id, c.id, { name: e.target.value })} onKeyDown={rowKeys(t.id, c.id)} />
+                <select value={TYPES.includes(c.type) ? c.type : 'custom'} onChange={(e) => setCol(t.id, c.id, { type: e.target.value })} onKeyDown={rowKeys(t.id, c.id)}>
                   {TYPES.map((x) => (
                     <option key={x}>{x}</option>
                   ))}
                   {!TYPES.includes(c.type) && <option value="custom">{c.type}</option>}
                 </select>
-                <input type="checkbox" checked={c.pk} onChange={(e) => setCol(t.id, c.id, { pk: e.target.checked, nullable: e.target.checked ? false : c.nullable })} />
-                <input type="checkbox" checked={c.nullable} disabled={c.pk} onChange={(e) => setCol(t.id, c.id, { nullable: e.target.checked })} />
-                <input type="checkbox" checked={!!c.unique} disabled={c.pk} onChange={(e) => setCol(t.id, c.id, { unique: e.target.checked })} />
+                <input type="checkbox" checked={c.pk} onChange={(e) => setCol(t.id, c.id, { pk: e.target.checked, nullable: e.target.checked ? false : c.nullable })} onKeyDown={rowKeys(t.id, c.id)} />
+                <input type="checkbox" checked={c.nullable} disabled={c.pk} onChange={(e) => setCol(t.id, c.id, { nullable: e.target.checked })} onKeyDown={rowKeys(t.id, c.id)} />
+                <input type="checkbox" checked={!!c.unique} disabled={c.pk} onChange={(e) => setCol(t.id, c.id, { unique: e.target.checked })} onKeyDown={rowKeys(t.id, c.id)} />
                 <select
                   value={c.fk ? `${c.fk.table}.${c.fk.column}` : ''}
+                  onKeyDown={rowKeys(t.id, c.id)}
                   onChange={(e) => {
                     const v = e.target.value
                     if (!v) return setCol(t.id, c.id, { fk: null })
@@ -114,7 +181,7 @@ export function SchemaStep({ challenge, notation, schema, onChange, er, onGraded
                       </option>
                     ))}
                 </select>
-                <button className="small ghost danger" onClick={() => setTable(t.id, { columns: t.columns.filter((x) => x.id !== c.id) })}>
+                <button className="small ghost danger" onClick={() => removeCol(t.id, c.id)}>
                   ✕
                 </button>
               </div>
@@ -221,7 +288,7 @@ export function SchemaDiagram({ schema, notation }: { schema: Schema; notation: 
       ))}
       {schema.tables.length === 0 && (
         <text x={20} y={30} fill="var(--muted)">
-          Add tables on the left; the diagram updates live.
+          Add tables on the left (T); the diagram updates live.
         </text>
       )}
     </svg>

@@ -10,7 +10,12 @@ import { loadProgress, updateProgress } from '../../lib/score'
 import { notifyProgress } from '../../App'
 import { GradeReport, Stars } from '../../components/GradeReport'
 import { Slot } from '../../components/Slots'
-import { ControlBar, mmss, useStopwatch } from '../../components/Controls'
+import { ControlBar } from '../../components/Controls'
+import { DDLQuickRef, ERQuickRef, SchemaQuickRef } from '../../components/QuickRef'
+import { useHotkeys } from '../../lib/hotkeys'
+import { patchChatContext } from '../../lib/chatContext'
+import { DesignSprint, DesignSprintSetup, type DesignSprintSettings } from './DesignSprint'
+import { describeDiagram, describeSchema } from './describe'
 
 type Step = 'er' | 'schema' | 'ddl'
 
@@ -21,7 +26,6 @@ interface Work {
   schema: Schema
   sql: string
   grades: { er: Grade | null; schema: Grade | null; ddl: Grade | null }
-  elapsed?: number
 }
 
 const WORK_KEY = (id: string) => `dbsim.design.work.${id}`
@@ -29,7 +33,7 @@ const WORK_KEY = (id: string) => `dbsim.design.work.${id}`
 function loadWork(id: string): Work {
   try {
     const raw = localStorage.getItem(WORK_KEY(id))
-    if (raw) return JSON.parse(raw)
+    if (raw) return { er: emptyDiagram(), schema: emptySchema(), sql: '', grades: { er: null, schema: null, ddl: null }, ...JSON.parse(raw) }
   } catch {
     /* ignore */
   }
@@ -39,7 +43,9 @@ function loadWork(id: string): Work {
 export function DesignModule({ company }: { company: Company }) {
   const content = useContent()
   const [challenge, setChallenge] = useState<DesignChallenge | null>(null)
+  const [sprint, setSprint] = useState<DesignSprintSettings | null>(null)
   const challenges = content.design.filter((c) => c.company === company.id)
+  if (sprint) return <DesignSprint company={company} challenges={challenges} settings={sprint} onExit={() => setSprint(null)} />
   if (!challenge) {
     const progress = loadProgress()
     return (
@@ -69,6 +75,7 @@ export function DesignModule({ company }: { company: Company }) {
           })}
           {challenges.length === 0 && <div className="muted">No design jobs for this employer yet.</div>}
         </div>
+        {challenges.length > 0 && <DesignSprintSetup challenges={challenges} onStart={setSprint} />}
         <Slot name="help">
           <div className="help-block">
             <h3>{company.name}</h3>
@@ -86,8 +93,14 @@ export function DesignModule({ company }: { company: Company }) {
                 <b>SQL DDL.</b> Write CREATE TABLE statements. They run in a real database and the constraints are tested.
               </li>
             </ol>
+            <h3>Sprints</h3>
+            <p>
+              A diagramming sprint fires short questions about pieces of the brief (one entity, one relationship, one mapping) against the clock. Streaks and speed multiply points, like
+              the SQL sprint.
+            </p>
             <p className="muted" style={{ fontSize: 12 }}>
-              Names are matched leniently (case, plurals, underscores, common abbreviations). Work is saved in this browser.
+              Grading looks at the amount and kind of things you draw (how many attributes, which are derived or multivalued, which cardinalities), not at the exact names. Work is saved
+              in this browser.
             </p>
           </div>
         </Slot>
@@ -103,28 +116,33 @@ function DesignChallengeView({ challenge, company, onBack }: { challenge: Design
   const [step, setStep] = useState<Step>('er')
   const [work, setWork] = useState<Work>(() => loadWork(challenge.id))
   const [showHints, setShowHints] = useState(0)
-  const [paused, setPaused] = useState(false)
   const [busy, setBusy] = useState(false)
   const checkRef = useRef<(() => void | Promise<void>) | null>(null)
-  const elapsed = useStopwatch(!paused, challenge.id) + (work.elapsed ?? 0)
-  const elapsedRef = useRef(elapsed)
-  elapsedRef.current = elapsed
 
   useEffect(() => {
-    localStorage.setItem(WORK_KEY(challenge.id), JSON.stringify({ ...work, elapsed: elapsedRef.current }))
+    localStorage.setItem(WORK_KEY(challenge.id), JSON.stringify(work))
   }, [work, challenge.id])
-  // persist elapsed time every 15 s and when leaving the job
+
+  const steps: [Step, string][] = [
+    ['er', 'ER diagram'],
+    ['schema', 'Relational schema'],
+    ['ddl', 'SQL DDL'],
+  ]
+  const done = (s: Step) => !!work.grades[s] && work.grades[s]!.score >= 0.8 * work.grades[s]!.max
+  const idx = steps.findIndex(([s]) => s === step)
+  const grade = work.grades[step]
+
+  // keep the professor chat informed
   useEffect(() => {
-    const save = () => {
-      const raw = loadWork(challenge.id)
-      localStorage.setItem(WORK_KEY(challenge.id), JSON.stringify({ ...raw, elapsed: elapsedRef.current }))
-    }
-    const id = setInterval(save, 15000)
-    return () => {
-      clearInterval(id)
-      save()
-    }
-  }, [challenge.id])
+    patchChatContext({
+      task: `${steps[idx][1]} step of design job "${challenge.title}"`,
+      brief: challenge.brief,
+      hints: challenge.hints,
+      work: step === 'er' ? describeDiagram(work.er) : step === 'schema' ? describeSchema(work.schema) : work.sql || '(no SQL yet)',
+      grade,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, work, challenge.id])
 
   const recordGrade = (which: Step, g: Grade) => {
     setWork((w) => ({ ...w, grades: { ...w.grades, [which]: g } }))
@@ -137,17 +155,8 @@ function DesignChallengeView({ challenge, company, onBack }: { challenge: Design
     notifyProgress()
   }
 
-  const steps: [Step, string][] = [
-    ['er', 'ER diagram'],
-    ['schema', 'Relational schema'],
-    ['ddl', 'SQL DDL'],
-  ]
-  const done = (s: Step) => !!work.grades[s] && work.grades[s]!.score >= 0.8 * work.grades[s]!.max
-  const idx = steps.findIndex(([s]) => s === step)
-  const grade = work.grades[step]
-
   const check = async () => {
-    if (!checkRef.current) return
+    if (!checkRef.current || busy) return
     setBusy(true)
     try {
       await checkRef.current()
@@ -155,6 +164,17 @@ function DesignChallengeView({ challenge, company, onBack }: { challenge: Design
       setBusy(false)
     }
   }
+  const go = (i: number) => setStep(steps[Math.max(0, Math.min(steps.length - 1, i))][0])
+
+  useHotkeys('Design job', [
+    { keys: 'ctrl+enter', label: `Check the current step`, handler: check },
+    { keys: 'alt+1', label: 'ER diagram step', handler: () => go(0) },
+    { keys: 'alt+2', label: 'Relational schema step', handler: () => go(1) },
+    { keys: 'alt+3', label: 'SQL DDL step', handler: () => go(2) },
+    { keys: 'ctrl+arrowleft', label: 'Previous step', handler: () => go(idx - 1) },
+    { keys: 'ctrl+arrowright', label: 'Next step', handler: () => go(idx + 1) },
+    { keys: 'alt+h', label: 'Reveal a hint', handler: () => setShowHints((h) => Math.min(h + 1, challenge.hints?.length ?? 0)) },
+  ])
 
   return (
     <div className="page wide fill">
@@ -167,7 +187,7 @@ function DesignChallengeView({ challenge, company, onBack }: { challenge: Design
       </div>
       <div className="stepper" style={{ marginBottom: 8 }}>
         {steps.map(([id, label], i) => (
-          <button key={id} className={`${step === id ? 'active' : ''} ${done(id) ? 'done' : ''}`} onClick={() => setStep(id)}>
+          <button key={id} className={`${step === id ? 'active' : ''} ${done(id) ? 'done' : ''}`} onClick={() => setStep(id)} title={`Alt+${i + 1}`}>
             <span className="step-n">{i + 1}</span>
             {label}
             <span className="muted" style={{ float: 'right', fontSize: 12 }}>
@@ -195,7 +215,7 @@ function DesignChallengeView({ challenge, company, onBack }: { challenge: Design
           {challenge.hints?.length ? (
             <div style={{ marginTop: 8 }}>
               <button className="small" onClick={() => setShowHints((h) => Math.min(h + 1, challenge.hints!.length))} disabled={showHints >= challenge.hints.length}>
-                Reveal a hint ({showHints}/{challenge.hints.length})
+                Reveal a hint ({showHints}/{challenge.hints.length}) <kbd>Alt+H</kbd>
               </button>
               <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
                 {challenge.hints.slice(0, showHints).map((h, i) => (
@@ -224,24 +244,22 @@ function DesignChallengeView({ challenge, company, onBack }: { challenge: Design
 
       <Slot name="controls">
         <ControlBar
-          clock={mmss(elapsed)}
-          clockLabel={paused ? 'paused' : 'elapsed on this job'}
+          reference={step === 'er' ? <ERQuickRef notation={n} /> : step === 'schema' ? <SchemaQuickRef notation={n} /> : <DDLQuickRef notation={n} />}
           stats={[
             { label: 'ER', value: work.grades.er ? work.grades.er.score : '—' },
             { label: 'Schema', value: work.grades.schema ? work.grades.schema.score : '—' },
             { label: 'DDL', value: work.grades.ddl ? work.grades.ddl.score : '—' },
           ]}
         >
-          <button className="primary" onClick={check} disabled={busy}>
+          <button className="primary" onClick={check} disabled={busy} title="Ctrl+Enter">
             {busy ? 'Checking…' : `Check ${steps[idx][1]}`}
           </button>
-          <button onClick={() => setStep(steps[Math.max(0, idx - 1)][0])} disabled={idx === 0}>
+          <button onClick={() => go(idx - 1)} disabled={idx === 0} title="Ctrl+←">
             ← Prev
           </button>
-          <button onClick={() => setStep(steps[Math.min(steps.length - 1, idx + 1)][0])} disabled={idx === steps.length - 1}>
+          <button onClick={() => go(idx + 1)} disabled={idx === steps.length - 1} title="Ctrl+→">
             Next →
           </button>
-          <button onClick={() => setPaused((p) => !p)}>{paused ? 'Resume' : 'Pause'}</button>
           <button className="ghost" onClick={onBack}>
             ■ Leave job
           </button>

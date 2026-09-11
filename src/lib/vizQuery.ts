@@ -1,5 +1,6 @@
-import type { Aggregation, FieldRef, VisualSpec, VisualType } from '../types/content'
+import type { Aggregation, CalcField, FieldRef, VisualSpec, VisualType } from '../types/content'
 import type { TableInfo } from './sqlite'
+import { CALC_TABLE, isCalc, resolveExpr } from './calcFields'
 
 export const VISUAL_LABELS: Record<VisualType, string> = {
   clusteredColumn: 'Clustered column chart',
@@ -52,8 +53,7 @@ export function fieldKey(f: FieldRef): string {
 const q = (s: string) => `"${s.replace(/"/g, '""')}"`
 const qf = (f: FieldRef) => `${q(f.table)}.${q(f.column)}`
 
-function aggSql(agg: Aggregation, f: FieldRef): string {
-  const x = qf(f)
+function wrapAgg(agg: Aggregation, x: string): string {
   switch (agg) {
     case 'sum':
       return `SUM(${x})`
@@ -72,8 +72,8 @@ function aggSql(agg: Aggregation, f: FieldRef): string {
   }
 }
 
-export function measureLabel(agg: Aggregation, f: FieldRef): string {
-  if (agg === 'none') return f.column
+export function measureLabel(agg: Aggregation, f: FieldRef, calc?: CalcField): string {
+  if (calc?.aggregate || agg === 'none') return f.column
   return `${AGG_LABELS[agg]} of ${f.column}`
 }
 
@@ -85,6 +85,7 @@ interface Edge {
   a: string
   b: string
   on: string
+  by: [string, string][]
 }
 
 function edges(model: TableInfo[]): Edge[] {
@@ -95,34 +96,44 @@ function edges(model: TableInfo[]): Edge[] {
       if (!ref) continue
       const to = fk.to.map((c, i) => c || ref.columns.filter((x) => x.pk > 0).sort((x, y) => x.pk - y.pk)[i]?.name || '')
       const on = fk.from.map((c, i) => `${q(t.name)}.${q(c)} = ${q(ref.name)}.${q(to[i])}`).join(' AND ')
-      out.push({ a: t.name, b: ref.name, on })
+      out.push({ a: t.name, b: ref.name, on, by: fk.from.map((c, i) => [c, to[i]] as [string, string]) })
     }
   }
   return out
 }
 
+export interface JoinStep {
+  table: string
+  /** Table already in the query that this one joins to. */
+  via: string
+  /** [column in `table`, column in `via`] pairs. */
+  by: [string, string][]
+}
+
 /** Build FROM/JOIN clause connecting all needed tables through foreign keys. */
-export function joinPlan(model: TableInfo[], needed: string[]): { from: string; error?: string; tables: string[] } {
+export function joinPlan(model: TableInfo[], needed: string[]): { from: string; error?: string; tables: string[]; steps: JoinStep[] } {
   const uniq = [...new Set(needed)]
-  if (!uniq.length) return { from: '', error: 'No fields selected.', tables: [] }
+  if (!uniq.length) return { from: '', error: 'No fields selected.', tables: [], steps: [] }
   const es = edges(model)
   const joined: string[] = [uniq[0]]
+  const steps: JoinStep[] = []
   let from = q(uniq[0])
-  const adj = (t: string) => es.filter((e) => e.a === t || e.b === t).map((e) => ({ other: e.a === t ? e.b : e.a, on: e.on }))
+  const adj = (t: string) =>
+    es.filter((e) => e.a === t || e.b === t).map((e) => ({ other: e.a === t ? e.b : e.a, on: e.on, by: e.a === t ? e.by.map(([x, y]) => [y, x] as [string, string]) : e.by }))
   while (true) {
     const missing = uniq.filter((t) => !joined.includes(t))
     if (!missing.length) break
     // BFS from joined set
-    const prev = new Map<string, { from: string; on: string }>()
+    const prev = new Map<string, { from: string; on: string; by: [string, string][] }>()
     const queue = [...joined]
     const seen = new Set(joined)
     let target: string | null = null
     while (queue.length && !target) {
       const cur = queue.shift()!
-      for (const { other, on } of adj(cur)) {
+      for (const { other, on, by } of adj(cur)) {
         if (seen.has(other)) continue
         seen.add(other)
-        prev.set(other, { from: cur, on })
+        prev.set(other, { from: cur, on, by })
         if (missing.includes(other)) {
           target = other
           break
@@ -130,7 +141,7 @@ export function joinPlan(model: TableInfo[], needed: string[]): { from: string; 
         queue.push(other)
       }
     }
-    if (!target) return { from, error: `No relationship path connects ${joined[0]} to ${missing[0]}.`, tables: joined }
+    if (!target) return { from, error: `No relationship path connects ${joined[0]} to ${missing[0]}.`, tables: joined, steps }
     // walk back to build path
     const path: string[] = []
     let cur: string = target
@@ -139,11 +150,13 @@ export function joinPlan(model: TableInfo[], needed: string[]): { from: string; 
       cur = prev.get(cur)!.from
     }
     for (const t of path) {
-      from += ` JOIN ${q(t)} ON ${prev.get(t)!.on}`
+      const p = prev.get(t)!
+      from += ` JOIN ${q(t)} ON ${p.on}`
+      steps.push({ table: t, via: p.from, by: p.by })
       joined.push(t)
     }
   }
-  return { from, tables: joined }
+  return { from, tables: joined, steps }
 }
 
 export interface BuiltQuery {
@@ -151,6 +164,18 @@ export interface BuiltQuery {
   /** Number of leading dimension columns in the result (0 for card). */
   dims: number
   error?: string
+  /** Tables joined, in order. */
+  tables: string[]
+  steps: JoinStep[]
+}
+
+/** Resolve a field (real column or calculated) to a SQL expression and the tables it needs. */
+function fieldSql(f: FieldRef, spec: VisualSpec, model: TableInfo[], prefer: string[]): { sql: string; tables: string[]; calc?: CalcField; error?: string } {
+  if (!isCalc(f)) return { sql: qf(f), tables: [f.table] }
+  const calc = (spec.calcs ?? []).find((c) => c.name === f.column)
+  if (!calc) return { sql: q(f.column), tables: [], error: `Calculated field "${f.column}" no longer exists.` }
+  const r = resolveExpr(calc.expr, model, spec.calcs ?? [], prefer)
+  return { sql: r.sql, tables: r.tables, calc, error: r.error }
 }
 
 export function buildSql(spec: VisualSpec, model: TableInfo[]): BuiltQuery {
@@ -168,14 +193,21 @@ export function buildSql(spec: VisualSpec, model: TableInfo[]): BuiltQuery {
     if (spec.legend && spec.type !== 'pie' && spec.type !== 'donut') dims.push(spec.legend)
     measures.push(...spec.values)
   }
-  if (!dims.length && !measures.length) return { sql: '', dims: 0, error: 'Drag fields into the visual to build it.' }
-  const needed = [...dims, ...measures.map((m) => m.field), ...spec.filters.map((f) => f.field)].map((f) => f.table)
+  if (!dims.length && !measures.length) return { sql: '', dims: 0, error: 'Drag fields into the visual to build it.', tables: [], steps: [] }
+
+  const realTables = [...dims, ...measures.map((m) => m.field), ...spec.filters.map((f) => f.field)].filter((f) => !isCalc(f)).map((f) => f.table)
+  const dimSql = dims.map((d) => fieldSql(d, spec, model, realTables))
+  const measSql = measures.map((m) => ({ ...fieldSql(m.field, spec, model, realTables), agg: m.agg, field: m.field }))
+  const firstError = [...dimSql, ...measSql].find((x) => x.error)?.error
+  if (firstError) return { sql: '', dims: 0, error: firstError, tables: [], steps: [] }
+  const needed = [...realTables, ...dimSql.flatMap((d) => d.tables), ...measSql.flatMap((m) => m.tables)]
   const plan = joinPlan(model, needed)
-  if (plan.error) return { sql: '', dims: 0, error: plan.error }
+  if (plan.error) return { sql: '', dims: 0, error: plan.error, tables: plan.tables, steps: plan.steps }
 
   const selectParts: string[] = []
-  for (const d of dims) selectParts.push(`${qf(d)} AS ${q(d.column)}`)
-  for (const m of measures) selectParts.push(`${aggSql(m.agg, m.field)} AS ${q(measureLabel(m.agg, m.field))}`)
+  dims.forEach((d, i) => selectParts.push(`${dimSql[i].sql} AS ${q(d.column)}`))
+  const measExpr = (m: (typeof measSql)[number]) => (m.calc?.aggregate ? m.sql : wrapAgg(m.agg, m.sql))
+  for (const m of measSql) selectParts.push(`${measExpr(m)} AS ${q(measureLabel(m.agg, m.field, m.calc))}`)
   // table with only dims and no measures: distinct rows (Power BI collapses duplicates)
   const distinct = spec.type === 'table' && !measures.length ? 'DISTINCT ' : ''
   let sql = `SELECT ${distinct}${selectParts.join(', ')} FROM ${plan.from}`
@@ -197,14 +229,14 @@ export function buildSql(spec: VisualSpec, model: TableInfo[]): BuiltQuery {
     })
     .filter(Boolean)
   if (where.length) sql += ` WHERE ${where.join(' AND ')}`
-  if (dims.length && measures.length) sql += ` GROUP BY ${dims.map((d) => qf(d)).join(', ')}`
+  if (dims.length && measures.length) sql += ` GROUP BY ${dimSql.map((d) => d.sql).join(', ')}`
   // ordering
   const sort = spec.sort ?? defaultSort(spec)
   if (sort && (dims.length || measures.length)) {
-    const target = sort.by === 'axis' ? (dims[0] ? qf(dims[0]) : null) : measures[0] ? aggSql(measures[0].agg, measures[0].field) : null
+    const target = sort.by === 'axis' ? (dimSql[0] ? dimSql[0].sql : null) : measSql[0] ? measExpr(measSql[0]) : null
     if (target) sql += ` ORDER BY ${target} ${sort.dir.toUpperCase()}`
   }
-  return { sql, dims: dims.length }
+  return { sql, dims: dims.length, tables: plan.tables, steps: plan.steps }
 }
 
 export function defaultSort(spec: VisualSpec): VisualSpec['sort'] | undefined {
@@ -222,6 +254,8 @@ export function defaultSort(spec: VisualSpec): VisualSpec['sort'] | undefined {
   }
 }
 
-export function emptySpec(type: VisualType = 'clusteredColumn'): VisualSpec {
-  return { type, values: [], columns: [], filters: [] }
+export function emptySpec(type: VisualType = 'clusteredColumn', calcs?: CalcField[]): VisualSpec {
+  return { type, values: [], columns: [], filters: [], calcs: calcs ?? [] }
 }
+
+export { CALC_TABLE, isCalc }

@@ -675,7 +675,7 @@
           }
         ],
         "notes": [
-          "MegaRevenue is derived (PricePaid \u00d7 StoreCutPct / 100) so it is not a column here. The production database stores it anyway for speed; that is a deliberate denormalization."
+          "MegaRevenue is derived (PricePaid × StoreCutPct / 100) so it is not a column here. The production database stores it anyway for speed; that is a deliberate denormalization."
         ]
       },
       "ddl": {
@@ -696,12 +696,12 @@
             "expect": "ok"
           },
           {
-            "description": "A review works once\u2026",
+            "description": "A review works once…",
             "sql": "INSERT INTO REVIEW (GameID, CustomerID, Rating, ReviewDate) VALUES (1, 1, 5, '2025-03-02')",
             "expect": "ok"
           },
           {
-            "description": "\u2026but the same customer reviewing the same game again is rejected.",
+            "description": "…but the same customer reviewing the same game again is rejected.",
             "sql": "INSERT INTO REVIEW (GameID, CustomerID, Rating, ReviewDate) VALUES (1, 1, 1, '2025-03-03')",
             "expect": "error"
           },
@@ -1780,7 +1780,7 @@
     {
       "id": "mega-sql",
       "company": "mega",
-      "title": "Mega EpicGames \u2014 SQL sprint",
+      "title": "Mega EpicGames — SQL sprint",
       "database": "mega",
       "questions": [
         {
@@ -2081,7 +2081,7 @@
           "id": "m26",
           "topic": "multi-join",
           "difficulty": 5,
-          "text": "For each hardware product name, show the name and the total revenue (sum of quantity \u00d7 unit price paid).",
+          "text": "For each hardware product name, show the name and the total revenue (sum of quantity × unit price paid).",
           "sql": "SELECT H.ProductName, SUM(L.Quantity * L.UnitPricePaid) FROM HardwareOrderLine L JOIN HardwareProduct H ON L.HardwareID = H.HardwareID GROUP BY H.ProductName",
           "hints": [
             "Multiply inside SUM()."
@@ -2244,7 +2244,7 @@
       "database": "mega",
       "brief": "Publishing wants to know which genres earn Mega the most: total Mega revenue per genre name, largest first, with a title.",
       "hints": [
-        "Three tables: StoreSale \u2192 Game \u2192 Genre. The model joins them."
+        "Three tables: StoreSale → Game → Genre. The model joins them."
       ],
       "expected": {
         "types": [
@@ -2278,7 +2278,7 @@
       "title": "Store revenue trend",
       "difficulty": 2,
       "database": "mega",
-      "brief": "Show Mega's store revenue month by month (SaleMonth) across 2024\u20132025, in order, with a title.",
+      "brief": "Show Mega's store revenue month by month (SaleMonth) across 2024–2025, in order, with a title.",
       "hints": [
         "Line chart, sorted by axis."
       ],
@@ -2509,6 +2509,369 @@
         "requireTitle": true
       },
       "referenceSql": "SELECT P.PlatformName, COUNT(GP.GameID) FROM GamePlatform GP JOIN Platform P ON GP.PlatformID = P.PlatformID GROUP BY P.PlatformName ORDER BY 2 DESC"
+    }
+  ],
+  "vizSprints": [
+    {
+      "id": "mega-viz-sprint",
+      "company": "mega",
+      "title": "Mega EpicGames — viz sprint",
+      "database": "mega",
+      "questions": [
+        {
+          "id": "mv01",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: Mega's total revenue from store sales (MegaRevenue).",
+          "sql": "SELECT SUM(MegaRevenue) FROM StoreSale",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "mv02",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: how many customers there are.",
+          "sql": "SELECT COUNT(CustomerID) FROM Customer",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "mv03",
+          "topic": "single-value",
+          "difficulty": 2,
+          "text": "Show one number: the average review rating across all reviews.",
+          "sql": "SELECT AVG(Rating) FROM Review",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "mv04",
+          "topic": "single-value",
+          "difficulty": 2,
+          "text": "Show one number: total hardware units sold (sum of order-line quantities).",
+          "sql": "SELECT SUM(Quantity) FROM HardwareOrderLine",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "mv05",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare Mega's store revenue (MegaRevenue) by genre name.",
+          "sql": "SELECT GE.GenreName, SUM(SS.MegaRevenue) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Genre GE ON G.GenreID = GE.GenreID GROUP BY GE.GenreName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv06",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare the number of store sales by customer tier.",
+          "sql": "SELECT C.Tier, COUNT(SS.SaleID) FROM StoreSale SS JOIN Customer C ON SS.CustomerID = C.CustomerID GROUP BY C.Tier",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv07",
+          "topic": "compare",
+          "difficulty": 3,
+          "text": "Compare total price paid by customers, per studio name.",
+          "sql": "SELECT S.StudioName, SUM(SS.PricePaid) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Studio S ON G.StudioID = S.StudioID GROUP BY S.StudioName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv08",
+          "topic": "compare",
+          "difficulty": 3,
+          "text": "Compare the average rating per game title.",
+          "sql": "SELECT G.Title, AVG(R.Rating) FROM Review R JOIN Game G ON R.GameID = G.GameID GROUP BY G.Title",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar",
+            "table"
+          ]
+        },
+        {
+          "id": "mv09",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare hardware units sold (sum of Quantity) by hardware type.",
+          "sql": "SELECT H.HardwareType, SUM(L.Quantity) FROM HardwareOrderLine L JOIN HardwareProduct H ON L.HardwareID = H.HardwareID GROUP BY H.HardwareType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv10",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare the number of games each studio has developed (by studio name).",
+          "sql": "SELECT S.StudioName, COUNT(G.GameID) FROM Game G JOIN Studio S ON G.StudioID = S.StudioID GROUP BY S.StudioName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv11",
+          "topic": "compare",
+          "difficulty": 3,
+          "text": "Compare total credit-transaction amount by transaction type.",
+          "sql": "SELECT TxnType, SUM(Amount) FROM CreditTransaction GROUP BY TxnType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv12",
+          "topic": "trend",
+          "difficulty": 2,
+          "text": "Show Mega's store revenue (MegaRevenue) month by month (SaleMonth).",
+          "sql": "SELECT SaleMonth, SUM(MegaRevenue) FROM StoreSale GROUP BY SaleMonth",
+          "types": [
+            "line"
+          ]
+        },
+        {
+          "id": "mv13",
+          "topic": "trend",
+          "difficulty": 2,
+          "text": "A titled line chart of the number of hardware orders per month (OrderMonth).",
+          "sql": "SELECT OrderMonth, COUNT(OrderID) FROM HardwareOrder GROUP BY OrderMonth",
+          "types": [
+            "line"
+          ],
+          "requireTitle": true
+        },
+        {
+          "id": "mv14",
+          "topic": "trend",
+          "difficulty": 3,
+          "text": "Show the number of store sales per month (SaleMonth) over time.",
+          "sql": "SELECT SaleMonth, COUNT(SaleID) FROM StoreSale GROUP BY SaleMonth",
+          "types": [
+            "line"
+          ]
+        },
+        {
+          "id": "mv15",
+          "topic": "part-whole",
+          "difficulty": 2,
+          "text": "Show each platform's share of the games available on it (count games per platform name).",
+          "sql": "SELECT P.PlatformName, COUNT(GP.GameID) FROM GamePlatform GP JOIN Platform P ON GP.PlatformID = P.PlatformID GROUP BY P.PlatformName",
+          "types": [
+            "pie",
+            "donut",
+            "clusteredBar",
+            "clusteredColumn"
+          ]
+        },
+        {
+          "id": "mv16",
+          "topic": "part-whole",
+          "difficulty": 2,
+          "text": "Show how hardware orders split across payment methods.",
+          "sql": "SELECT PaymentMethod, COUNT(OrderID) FROM HardwareOrder GROUP BY PaymentMethod",
+          "types": [
+            "pie",
+            "donut",
+            "clusteredBar",
+            "clusteredColumn"
+          ]
+        },
+        {
+          "id": "mv17",
+          "topic": "table",
+          "difficulty": 2,
+          "text": "A table of every game: title, release date and list price.",
+          "sql": "SELECT Title, ReleaseDate, ListPrice FROM Game",
+          "types": [
+            "table"
+          ]
+        },
+        {
+          "id": "mv18",
+          "topic": "table",
+          "difficulty": 2,
+          "text": "A table of hardware products: product name, unit cost and unit price.",
+          "sql": "SELECT ProductName, UnitCost, UnitPrice FROM HardwareProduct",
+          "types": [
+            "table"
+          ]
+        },
+        {
+          "id": "mv19",
+          "topic": "table",
+          "difficulty": 3,
+          "text": "A table with one row per country of customer: country and total price paid in the store.",
+          "sql": "SELECT C.Country, SUM(SS.PricePaid) FROM StoreSale SS JOIN Customer C ON SS.CustomerID = C.CustomerID GROUP BY C.Country",
+          "types": [
+            "table",
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv20",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Mega revenue by genre name, only for customers from {{country}}.",
+          "sql": "SELECT GE.GenreName, SUM(SS.MegaRevenue) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Genre GE ON G.GenreID = GE.GenreID JOIN Customer C ON SS.CustomerID = C.CustomerID WHERE C.Country = '{{country}}' GROUP BY GE.GenreName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "params": {
+            "country": {
+              "from": "SELECT DISTINCT Country FROM Customer"
+            }
+          }
+        },
+        {
+          "id": "mv21",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Credit-transaction amount by transaction type, only for accounts whose status is {{status}}.",
+          "sql": "SELECT T.TxnType, SUM(T.Amount) FROM CreditTransaction T JOIN CreditAccount A ON T.AccountID = A.AccountID WHERE A.Status = '{{status}}' GROUP BY T.TxnType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "params": {
+            "status": {
+              "from": "SELECT DISTINCT A.Status FROM CreditAccount A JOIN CreditTransaction T ON T.AccountID = A.AccountID"
+            }
+          }
+        },
+        {
+          "id": "mv22",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Hardware units (sum of Quantity) by hardware type, only for orders shipped to {{country}}.",
+          "sql": "SELECT H.HardwareType, SUM(L.Quantity) FROM HardwareOrderLine L JOIN HardwareOrder O ON L.OrderID = O.OrderID JOIN HardwareProduct H ON L.HardwareID = H.HardwareID WHERE O.ShipCountry = '{{country}}' GROUP BY H.HardwareType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "params": {
+            "country": {
+              "from": "SELECT DISTINCT ShipCountry FROM HardwareOrder"
+            }
+          }
+        },
+        {
+          "id": "mv23",
+          "topic": "filter",
+          "difficulty": 4,
+          "text": "Monthly Mega revenue (SaleMonth) for games published by Mega only (PublishedByMega = 1).",
+          "sql": "SELECT SS.SaleMonth, SUM(SS.MegaRevenue) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID WHERE G.PublishedByMega = 1 GROUP BY SS.SaleMonth",
+          "types": [
+            "line"
+          ],
+          "hints": [
+            "PublishedByMega is a 0/1 flag: filter it to 1."
+          ]
+        },
+        {
+          "id": "mv24",
+          "topic": "calc",
+          "difficulty": 3,
+          "text": "Hardware line revenue per hardware type: sum of Quantity * UnitPricePaid.",
+          "sql": "SELECT H.HardwareType, SUM(L.Quantity * L.UnitPricePaid) FROM HardwareOrderLine L JOIN HardwareProduct H ON L.HardwareID = H.HardwareID GROUP BY H.HardwareType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv25",
+          "topic": "calc",
+          "difficulty": 4,
+          "text": "Hardware profit per product name: sum of Quantity * (UnitPricePaid - UnitCost).",
+          "sql": "SELECT H.ProductName, SUM(L.Quantity * (L.UnitPricePaid - H.UnitCost)) FROM HardwareOrderLine L JOIN HardwareProduct H ON L.HardwareID = H.HardwareID GROUP BY H.ProductName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar",
+            "table"
+          ],
+          "hints": [
+            "The expression uses columns from two tables; that is fine."
+          ]
+        },
+        {
+          "id": "mv26",
+          "topic": "calc",
+          "difficulty": 4,
+          "text": "Mega's share of the price paid, per studio name, in percent: SUM(MegaRevenue) * 100.0 / SUM(PricePaid).",
+          "sql": "SELECT S.StudioName, SUM(SS.MegaRevenue) * 100.0 / SUM(SS.PricePaid) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Studio S ON G.StudioID = S.StudioID GROUP BY S.StudioName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv27",
+          "topic": "two-dim",
+          "difficulty": 4,
+          "text": "Hardware units (sum of Quantity) per ship country, split by hardware type.",
+          "sql": "SELECT O.ShipCountry, H.HardwareType, SUM(L.Quantity) FROM HardwareOrderLine L JOIN HardwareOrder O ON L.OrderID = O.OrderID JOIN HardwareProduct H ON L.HardwareID = H.HardwareID GROUP BY O.ShipCountry, H.HardwareType",
+          "types": [
+            "stackedColumn",
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv28",
+          "topic": "two-dim",
+          "difficulty": 4,
+          "text": "Mega revenue per genre name, split by customer tier.",
+          "sql": "SELECT GE.GenreName, C.Tier, SUM(SS.MegaRevenue) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Genre GE ON G.GenreID = GE.GenreID JOIN Customer C ON SS.CustomerID = C.CustomerID GROUP BY GE.GenreName, C.Tier",
+          "types": [
+            "stackedColumn",
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "mv29",
+          "topic": "sort",
+          "difficulty": 3,
+          "text": "Studios ranked by total price paid in the store, highest first.",
+          "sql": "SELECT S.StudioName, SUM(SS.PricePaid) FROM StoreSale SS JOIN Game G ON SS.GameID = G.GameID JOIN Studio S ON G.StudioID = S.StudioID GROUP BY S.StudioName ORDER BY 2 DESC",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "orderMatters": true
+        },
+        {
+          "id": "mv30",
+          "topic": "sort",
+          "difficulty": 3,
+          "text": "Hardware types ordered by total line revenue (Quantity * UnitPricePaid), LOWEST first.",
+          "sql": "SELECT H.HardwareType, SUM(L.Quantity * L.UnitPricePaid) FROM HardwareOrderLine L JOIN HardwareProduct H ON L.HardwareID = H.HardwareID GROUP BY H.HardwareType ORDER BY 2 ASC",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "orderMatters": true
+        }
+      ]
     }
   ]
 }

@@ -10,6 +10,8 @@ import { ResultTable } from '../../components/ResultTable'
 import { SchemaSidebar } from '../../components/SchemaSidebar'
 import { Slot } from '../../components/Slots'
 import { ControlBar, mmss } from '../../components/Controls'
+import { useHotkeys } from '../../lib/hotkeys'
+import { patchChatContext } from '../../lib/chatContext'
 
 interface Settings {
   setId: string
@@ -234,6 +236,18 @@ function Sprint({ set, company, settings, onExit }: { set: QuerySet; company: Co
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished])
 
+  useEffect(() => {
+    if (!current) return
+    patchChatContext({
+      task: `SQL sprint question (${TOPIC_LABELS[current.template.topic] ?? current.template.topic})`,
+      brief: current.text,
+      hints: current.template.hints,
+      work: sql.trim() ? `SQL so far:\n${sql}${error ? `\nError: ${error}` : ''}${feedback ? `\nLast feedback: ${feedback.text}` : ''}` : '(no SQL typed yet)',
+      grade: null,
+      notes: `Reference SQL (for you only, never paste it): ${current.sql}`,
+    })
+  }, [current, sql, error, feedback])
+
   const nextQuestion = () => {
     const db = dbRef.current
     if (!db) return
@@ -321,6 +335,13 @@ function Sprint({ set, company, settings, onExit }: { set: QuerySet; company: Co
     setFeedback({ kind: 'warn', text: 'Solution shown below. No points for this one. Study it, then continue.' })
   }
 
+  useHotkeys('SQL sprint', [
+    { keys: 'ctrl+enter', label: 'Run the query', handler: runSql, when: () => !!current },
+    { keys: 'ctrl+shift+enter', label: 'Submit the answer', handler: submit, when: () => !!current && !revealed },
+    { keys: 'alt+n', label: 'Skip / next', handler: () => (revealed ? setCurrent(null) : skip()), when: () => !!current },
+    { keys: 'alt+s', label: 'Show solution (after 2 attempts)', handler: reveal, when: () => attempts >= 2 && !revealed },
+  ])
+
   const helpSlot = (
     <Slot name="help">
       <div className="help-block">
@@ -402,7 +423,7 @@ function Sprint({ set, company, settings, onExit }: { set: QuerySet; company: Co
             style={{ marginTop: 8, minHeight: 120 }}
             value={sql}
             spellCheck={false}
-            placeholder="SELECT ...   (Ctrl+Enter to run, Ctrl+Shift+Enter to submit)"
+            placeholder="SELECT ...   (Ctrl+Enter to run, Ctrl+Shift+Enter to submit, Alt+N to skip)"
             onChange={(e) => setSql(e.target.value)}
             onKeyDown={(e) => {
               if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {

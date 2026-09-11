@@ -14,9 +14,11 @@ import { readFileSync } from 'node:fs'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import initSqlJs from 'sql.js'
-import type { ContentPack, DesignChallenge, PresentationChallenge, VisualSpec } from '../src/types/content'
+import type { ContentPack, DesignChallenge, PresentationChallenge, VisualSpec, VisualType } from '../src/types/content'
 import { assemble, validatePack } from '../src/content/index'
 import { generateQuestion } from '../src/lib/questionGen'
+import { generateDesignPool } from '../src/lib/designSprint'
+import { diagramFromReference } from '../src/lib/erRef'
 import { compareResults } from '../src/lib/resultCompare'
 import { buildSql } from '../src/lib/vizQuery'
 import { gradeViz } from '../src/lib/vizGrade'
@@ -24,7 +26,7 @@ import { gradeER } from '../src/lib/erGrade'
 import { gradeSchema, rewriteNames, schemaFromDb } from '../src/lib/schemaGrade'
 import type { Cell, ResultSet, TableInfo } from '../src/lib/sqlite'
 import { splitStatements } from '../src/lib/sqlSplit'
-import type { ERDiagram, ERNode, Schema } from '../src/modules/design/erModel'
+import type { Schema } from '../src/modules/design/erModel'
 
 const root = process.env.DBSIM_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), '..')
 let failures = 0
@@ -155,6 +157,40 @@ for (const set of content.queries) {
   ok(`topics: ${[...topics].map(([k, v]) => `${k}(${v})`).join(', ')}`)
 }
 
+// ---- viz sprint sets ---------------------------------------------------------
+const VISUAL_TYPES: VisualType[] = ['clusteredColumn', 'clusteredBar', 'stackedColumn', 'line', 'pie', 'donut', 'card', 'table']
+for (const set of content.vizSprints) {
+  console.log(`\nViz sprint set ${set.id} (${set.questions.length} templates)`)
+  const db = dbs.get(set.database)
+  if (!db) {
+    fail(`database ${set.database} missing`)
+    continue
+  }
+  const topics = new Map<string, number>()
+  for (const t of set.questions) {
+    topics.set(t.topic, (topics.get(t.topic) ?? 0) + 1)
+    const badTypes = t.types.filter((x) => !VISUAL_TYPES.includes(x))
+    if (badTypes.length) fail(`${t.id}: unknown visual type(s) ${badTypes.join(', ')}`)
+    let bad = 0
+    let empty = 0
+    for (let i = 0; i < 5; i++) {
+      const g = generateQuestion(db as never, t)
+      if (!g) {
+        bad++
+        continue
+      }
+      if (!g.expected.rows.length) empty++
+      if (/\{\{/.test(g.text) || /\{\{/.test(g.sql)) fail(`${t.id}: unreplaced placeholder`)
+      const cols = g.expected.columns.length
+      const expectCols = t.types[0] === 'card' ? 1 : undefined
+      if (expectCols && cols !== expectCols) fail(`${t.id}: a card needs exactly 1 column, reference returns ${cols}`)
+    }
+    if (bad) fail(`${t.id}: reference SQL failed to run ${bad}/5 draws`)
+    else if (empty) warn(`${t.id}: produced an empty result on ${empty}/5 draws`)
+  }
+  ok(`topics: ${[...topics].map(([k, v]) => `${k}(${v})`).join(', ')}`)
+}
+
 // ---- presentation ------------------------------------------------------------
 function idealSpec(c: PresentationChallenge): VisualSpec {
   const ex = c.expected
@@ -220,33 +256,6 @@ for (const c of content.presentation) {
 }
 
 // ---- design ------------------------------------------------------------------
-function diagramFromReference(c: DesignChallenge): ERDiagram {
-  const nodes: ERNode[] = []
-  const ids = new Map<string, string>()
-  c.er.entities.forEach((e, i) => {
-    const id = `e${i}`
-    ids.set(e.name, id)
-    nodes.push({ id, kind: 'entity', name: e.name, x: 0, y: 0, weak: e.weak })
-    e.attributes.forEach((a, j) => nodes.push({ id: `${id}a${j}`, kind: 'attribute', name: a.name, owner: id, x: 0, y: 0, key: a.key, partialKey: a.partialKey, multivalued: a.multivalued, derived: a.derived, composite: a.composite, optional: a.optional }))
-  })
-  c.er.relationships.forEach((r, i) => {
-    const id = `r${i}`
-    nodes.push({
-      id,
-      kind: 'relationship',
-      name: r.name,
-      x: 0,
-      y: 0,
-      identifying: r.identifying,
-      sides: [
-        { entity: ids.get(r.sides[0].entity)!, max: r.sides[0].max, min: r.sides[0].min, role: r.sides[0].role },
-        { entity: ids.get(r.sides[1].entity)!, max: r.sides[1].max, min: r.sides[1].min, role: r.sides[1].role },
-      ],
-    })
-    r.attributes?.forEach((a, j) => nodes.push({ id: `${id}a${j}`, kind: 'attribute', name: a.name, owner: id, x: 0, y: 0, key: a.key, multivalued: a.multivalued, derived: a.derived, composite: a.composite }))
-  })
-  return { nodes }
-}
 function schemaFromReference(c: DesignChallenge): Schema {
   return {
     tables: c.schema.tables.map((t, i) => ({
@@ -301,6 +310,32 @@ for (const c of content.design) {
     db.close()
   } catch (e) {
     fail(`reference DDL failed: ${(e as Error).message}`)
+  }
+}
+
+// ---- diagramming sprint questions ----------------------------------------------
+{
+  const byCompany = new Map<string, DesignChallenge[]>()
+  for (const c of content.design) byCompany.set(c.company, [...(byCompany.get(c.company) ?? []), c])
+  for (const [company, list] of byCompany) {
+    const pool = generateDesignPool(list, ['entity', 'relationship', 'cluster', 'schema'])
+    console.log(`\nDiagramming sprint pool for ${company}: ${pool.length} questions`)
+    const kinds = new Map<string, number>()
+    let good = 0
+    for (const qn of pool) {
+      kinds.set(qn.kind, (kinds.get(qn.kind) ?? 0) + 1)
+      if (qn.kind === 'schema') {
+        const sg = gradeSchema(schemaFromReference(qn.challenge), qn.challenge, n)
+        if (sg.grade.score === sg.grade.max) good++
+        else fail(`${qn.id}: reference schema scores only ${sg.grade.score}/${sg.grade.max}: ${sg.grade.items.filter((i) => !i.ok && !i.hidden).map((i) => i.text).join(' | ')}`)
+      } else {
+        const er = gradeER(diagramFromReference(qn.challenge), qn.challenge, n)
+        if (er.score === er.max) good++
+        else fail(`${qn.id}: reference ER scores only ${er.score}/${er.max}: ${er.items.filter((i) => !i.ok && !i.hidden).map((i) => i.text).join(' | ')}`)
+      }
+      if (!qn.text.trim()) fail(`${qn.id}: empty question text`)
+    }
+    ok(`${good}/${pool.length} reference answers score 100%: ${[...kinds].map(([k, v]) => `${k}(${v})`).join(', ')}`)
   }
 }
 

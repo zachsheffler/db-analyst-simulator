@@ -8,16 +8,17 @@ These prompts turn your lecture material into **content packs** the game can loa
 2. **Design challenges.** Run `02-design-challenges.md` with a case study (or ask for new ones in a domain). Save as `public/packs/<name>-design.json`.
 3. **Query sets.** Run `03-query-pack.md` to create a database and question templates from your SQL lectures. Save as `public/packs/<name>-queries.json`.
 4. **Presentation challenges.** Run `04-presentation-challenges.md` with your visualization unit and a database. Save as `public/packs/<name>-viz.json`.
-5. **List each file** in `public/packs/manifest.json`:
+5. **Viz sprint questions.** Run `06-viz-sprint-pack.md` for the timed chart drill (short questions graded by comparing the visual's numbers with a reference query). Diagramming sprints need no extra content: their questions are generated from the design challenges' reference solutions.
+6. **List each file** in `public/packs/manifest.json`:
    ```json
    { "packs": ["notation.json", "riverbend-db.json", "riverbend-challenges.json", "week3-design.json"] }
    ```
-6. **Validate** before publishing:
+7. **Validate** before publishing:
    ```
    npm run validate
    ```
-   This builds every database, runs every question template, checks that each presentation challenge's ideal visual reproduces its reference query, and feeds every design challenge's reference solution through the graders (a reference must score 100%). Paste any failures into `05-review-and-fix.md` to have Claude repair the pack.
-7. **Build and deploy** (`npm run build`, publish `dist/`). Students can also import a pack file directly from the Home tab without a rebuild, which is handy for testing.
+   This builds every database, runs every question template (SQL and viz sprints), checks that each presentation challenge's ideal visual reproduces its reference query, feeds every design challenge's reference solution through the graders (a reference must score 100%), and generates every diagramming-sprint question to confirm its reference answer scores 100%. Paste any failures into `05-review-and-fix.md` to have Claude repair the pack.
+8. **Build and deploy** (`npm run build`, publish `dist/`). Students can also import a pack file directly from the Home tab without a rebuild, which is handy for testing.
 
 ## Employers (difficulty tiers)
 

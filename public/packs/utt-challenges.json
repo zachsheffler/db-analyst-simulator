@@ -1092,7 +1092,7 @@
     {
       "id": "utt-sql",
       "company": "utt",
-      "title": "Ulysses Tech Tips \u2014 SQL sprint",
+      "title": "Ulysses Tech Tips — SQL sprint",
       "database": "utt",
       "questions": [
         {
@@ -1742,6 +1742,353 @@
         "requireTitle": true
       },
       "referenceSql": "SELECT V.VideoType, AVG(V.Views) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID WHERE C.ChannelName = 'Ulysses Tech Tips' GROUP BY V.VideoType ORDER BY 2 DESC"
+    }
+  ],
+  "vizSprints": [
+    {
+      "id": "utt-viz-sprint",
+      "company": "utt",
+      "title": "Ulysses Tech Tips — viz sprint",
+      "database": "utt",
+      "questions": [
+        {
+          "id": "uv01",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: total views across every video.",
+          "sql": "SELECT SUM(Views) FROM Video",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "uv02",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: how many employees the company has.",
+          "sql": "SELECT COUNT(EmpID) FROM Employee",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "uv03",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: total sponsorship fees collected.",
+          "sql": "SELECT SUM(Fee) FROM Sponsorship",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "uv04",
+          "topic": "single-value",
+          "difficulty": 2,
+          "text": "Show one number: the longest video, in minutes.",
+          "sql": "SELECT MAX(DurationMin) FROM Video",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "uv05",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare total views by channel name.",
+          "sql": "SELECT C.ChannelName, SUM(V.Views) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID GROUP BY C.ChannelName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv06",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare the number of videos of each video type.",
+          "sql": "SELECT VideoType, COUNT(VideoID) FROM Video GROUP BY VideoType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv07",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare average views per video by video type.",
+          "sql": "SELECT VideoType, AVG(Views) FROM Video GROUP BY VideoType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "hints": [
+            "Average, not sum."
+          ]
+        },
+        {
+          "id": "uv08",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare total annual salary by department name.",
+          "sql": "SELECT D.DeptName, SUM(E.AnnualSalary) FROM Employee E JOIN Department D ON E.DeptID = D.DeptID GROUP BY D.DeptName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv09",
+          "topic": "compare",
+          "difficulty": 3,
+          "text": "Compare total sponsorship fees by sponsor industry.",
+          "sql": "SELECT S.Industry, SUM(SP.Fee) FROM Sponsorship SP JOIN Sponsor S ON SP.SponsorID = S.SponsorID GROUP BY S.Industry",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv10",
+          "topic": "compare",
+          "difficulty": 3,
+          "text": "How many videos has each employee hosted? Compare by employee name.",
+          "sql": "SELECT E.EmpName, COUNT(V.VideoID) FROM Video V JOIN Employee E ON V.HostEmpID = E.EmpID GROUP BY E.EmpName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar",
+            "table"
+          ]
+        },
+        {
+          "id": "uv11",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare the average MSRP of products by product category.",
+          "sql": "SELECT Category, AVG(MSRP) FROM Product GROUP BY Category",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv12",
+          "topic": "trend",
+          "difficulty": 2,
+          "text": "Show total views per publish month over time (PublishMonth).",
+          "sql": "SELECT PublishMonth, SUM(Views) FROM Video GROUP BY PublishMonth",
+          "types": [
+            "line"
+          ]
+        },
+        {
+          "id": "uv13",
+          "topic": "trend",
+          "difficulty": 3,
+          "text": "Show sponsorship fees over time, by the month the sponsored video was published.",
+          "sql": "SELECT V.PublishMonth, SUM(S.Fee) FROM Sponsorship S JOIN Video V ON S.VideoID = V.VideoID GROUP BY V.PublishMonth",
+          "types": [
+            "line"
+          ]
+        },
+        {
+          "id": "uv14",
+          "topic": "trend",
+          "difficulty": 3,
+          "text": "A titled line chart of the number of videos published per month (PublishMonth).",
+          "sql": "SELECT PublishMonth, COUNT(VideoID) FROM Video GROUP BY PublishMonth",
+          "types": [
+            "line"
+          ],
+          "requireTitle": true
+        },
+        {
+          "id": "uv15",
+          "topic": "part-whole",
+          "difficulty": 2,
+          "text": "Show each channel's share of the total number of videos (by channel name).",
+          "sql": "SELECT C.ChannelName, COUNT(V.VideoID) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID GROUP BY C.ChannelName",
+          "types": [
+            "pie",
+            "donut",
+            "clusteredBar",
+            "clusteredColumn"
+          ]
+        },
+        {
+          "id": "uv16",
+          "topic": "part-whole",
+          "difficulty": 2,
+          "text": "Show how sponsorship slots split between placements (count per Placement).",
+          "sql": "SELECT Placement, COUNT(SponsorshipID) FROM Sponsorship GROUP BY Placement",
+          "types": [
+            "pie",
+            "donut",
+            "clusteredBar",
+            "clusteredColumn"
+          ]
+        },
+        {
+          "id": "uv17",
+          "topic": "table",
+          "difficulty": 2,
+          "text": "A table of every employee: name, title and annual salary.",
+          "sql": "SELECT EmpName, Title, AnnualSalary FROM Employee",
+          "types": [
+            "table"
+          ]
+        },
+        {
+          "id": "uv18",
+          "topic": "table",
+          "difficulty": 3,
+          "text": "A table with one row per manufacturer: manufacturer name and number of products.",
+          "sql": "SELECT M.ManufacturerName, COUNT(P.ProductID) FROM Product P JOIN Manufacturer M ON P.ManufacturerID = M.ManufacturerID GROUP BY M.ManufacturerName",
+          "types": [
+            "table",
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv19",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Total views by video type, only for the channel {{channel}}.",
+          "sql": "SELECT V.VideoType, SUM(V.Views) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID WHERE C.ChannelName = '{{channel}}' GROUP BY V.VideoType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "params": {
+            "channel": {
+              "from": "SELECT ChannelName FROM Channel"
+            }
+          }
+        },
+        {
+          "id": "uv20",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Total fees by sponsor name for {{placement}} placements only.",
+          "sql": "SELECT S.SponsorName, SUM(SP.Fee) FROM Sponsorship SP JOIN Sponsor S ON SP.SponsorID = S.SponsorID WHERE SP.Placement = '{{placement}}' GROUP BY S.SponsorName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar",
+            "table"
+          ],
+          "params": {
+            "placement": {
+              "from": "SELECT DISTINCT Placement FROM Sponsorship"
+            }
+          }
+        },
+        {
+          "id": "uv21",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Number of videos per channel name, counting only videos with at least {{v}} views.",
+          "sql": "SELECT C.ChannelName, COUNT(V.VideoID) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID WHERE V.Views >= {{v}} GROUP BY C.ChannelName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "params": {
+            "v": {
+              "values": [
+                257000,
+                578000,
+                938000
+              ]
+            }
+          }
+        },
+        {
+          "id": "uv22",
+          "topic": "calc",
+          "difficulty": 3,
+          "text": "Total salary cost in thousands per department name: sum of AnnualSalary / 1000.0.",
+          "sql": "SELECT D.DeptName, SUM(E.AnnualSalary / 1000.0) FROM Employee E JOIN Department D ON E.DeptID = D.DeptID GROUP BY D.DeptName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv23",
+          "topic": "calc",
+          "difficulty": 4,
+          "text": "Sponsorship fee per thousand views by channel name: SUM(Fee) * 1000.0 / SUM(Views).",
+          "sql": "SELECT C.ChannelName, SUM(S.Fee) * 1000.0 / SUM(V.Views) FROM Sponsorship S JOIN Video V ON S.VideoID = V.VideoID JOIN Channel C ON V.ChannelID = C.ChannelID GROUP BY C.ChannelName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "hints": [
+            "Aggregate calculated field: the SUMs go inside the expression."
+          ]
+        },
+        {
+          "id": "uv24",
+          "topic": "calc",
+          "difficulty": 3,
+          "text": "Total hours of video published per channel name: sum of DurationMin / 60.0.",
+          "sql": "SELECT C.ChannelName, SUM(V.DurationMin / 60.0) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID GROUP BY C.ChannelName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv25",
+          "topic": "two-dim",
+          "difficulty": 4,
+          "text": "Number of product verdicts per manufacturer name, split by verdict.",
+          "sql": "SELECT M.ManufacturerName, VP.Verdict, COUNT(VP.ProductID) FROM VideoProduct VP JOIN Product P ON VP.ProductID = P.ProductID JOIN Manufacturer M ON P.ManufacturerID = M.ManufacturerID GROUP BY M.ManufacturerName, VP.Verdict",
+          "types": [
+            "stackedColumn",
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv26",
+          "topic": "two-dim",
+          "difficulty": 4,
+          "text": "Total sponsorship fees per placement, split by sponsor industry.",
+          "sql": "SELECT SP.Placement, S.Industry, SUM(SP.Fee) FROM Sponsorship SP JOIN Sponsor S ON SP.SponsorID = S.SponsorID GROUP BY SP.Placement, S.Industry",
+          "types": [
+            "stackedColumn",
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "uv27",
+          "topic": "sort",
+          "difficulty": 3,
+          "text": "Channels ranked by total views, highest first.",
+          "sql": "SELECT C.ChannelName, SUM(V.Views) FROM Video V JOIN Channel C ON V.ChannelID = C.ChannelID GROUP BY C.ChannelName ORDER BY 2 DESC",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "orderMatters": true
+        },
+        {
+          "id": "uv28",
+          "topic": "sort",
+          "difficulty": 3,
+          "text": "Sponsor industries ordered by total fee, LOWEST first.",
+          "sql": "SELECT S.Industry, SUM(SP.Fee) FROM Sponsorship SP JOIN Sponsor S ON SP.SponsorID = S.SponsorID GROUP BY S.Industry ORDER BY 2 ASC",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "orderMatters": true
+        }
+      ]
     }
   ]
 }

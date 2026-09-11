@@ -13,7 +13,8 @@ A pack is one JSON file. The game loads every file listed in `public/packs/manif
   "databases": [ ],
   "design": [ ],
   "queries": [ ],
-  "presentation": [ ]
+  "presentation": [ ],
+  "vizSprints": [ ]
 }
 ```
 
@@ -148,7 +149,8 @@ Tests use reference names; the grader rewrites them to the student's table/colum
 ### How design grading works
 
 - Names are matched case-insensitively, ignoring plurals, punctuation, and common abbreviations (`Cust`, `Qty`, `No`, `DOB`, …), plus the explicit `aliases`. A column may also be matched with the table name stripped (`Customer.CustID` ≈ `Customer.ID`).
-- **ER**: entity present (6), weak flag (3), each attribute present (2) + key/multivalued/derived/composite/partial-key flags (1–2 each), relationship present (4), cardinality (6, half credit for one side), participation (4, half credit), identifying (2). Extra entities/relationships are warnings unless excessive. Scaled to `points.er`.
+- **ER**: grading is about the *amount and nature* of the model, not the names. Entities and attributes are paired by name where possible and **by structure otherwise** (attribute counts, attribute types, weak flag, number of relationships), so a correctly drawn entity called `THING` still counts. Points: entity present (6 each), weak flag (3), each attribute present (2) + key/multivalued/derived/composite/partial-key type (1–2 each), relationship present (4), cardinality (6, half credit for one side), participation (4, half credit), identifying (2). Extra entities/relationships are warnings unless excessive. Scaled to `points.er`.
+  The report shows **broad feedback only** ("VEHICLE: 4 of 5 attributes present; missing one (one derived)", "relationship VEHICLE–GIG: cardinality wrong on one side"). The exact errors, including `rationale`, are attached to the grade as hidden items and handed to the professor chat so it can nudge without reciting the answer.
 - **Schema**: table present (6), column present (2), `unique` column is UNIQUE or PK (2), PK correct (4), each FK (4), penalties for wrong FKs and too many extra tables. Scaled to `points.schema`.
 - **DDL**: script runs (10) + schema grade of the introspected database (70) + tests (20 shared). Scaled to `points.ddl`.
 
@@ -182,7 +184,11 @@ Tests use reference names; the grader rewrites them to the student's table/colum
 - Topics: `select-basic`, `select-where`, `distinct-order`, `like-in-between`, `aggregate`, `group-by`, `having`, `join`, `multi-join`, `alias`, `subquery`, `set-ops`, `exists`, `self-join`, `null`, `outer-join`, `view`, `dml` (the last two are not usable in sprints, which allow SELECT only).
 - Default points by difficulty: 10 / 15 / 20 / 30 / 40.
 
-## `presentation[]` — Power BI-style challenges
+## Diagramming sprints (generated, no content needed)
+
+The Diagramming module's sprint generates questions from the `design[]` reference solutions: draw one entity with its attributes, model one relationship (both entities with only their identifying attributes), draw an entity with all its relationships, or map an ER fragment to tables. Mini-briefs are rendered from the reference structure (`describeEntity`, `describeRelationship` in `src/lib/designSprint.ts`), so the clearer your entity and attribute names, the better the generated text reads. A mapping question's table subset is derived from `schema.tables`: the tables matched to the entities involved (foreign keys to tables outside the fragment are dropped) plus any bridge / multivalued-attribute tables whose foreign keys all stay inside the fragment. `npm run validate` generates every question and confirms its reference answer scores 100%.
+
+## `presentation[]` — challenges in the Viz workbench
 
 ```json
 {
@@ -208,8 +214,40 @@ Tests use reference names; the grader rewrites them to the student's table/colum
 }
 ```
 
+- The same challenge is playable in any of the three workbench skins (Power BI-, Tableau- or ggplot-style); the student picks the tool, the grading is identical.
 - Visual types: `clusteredColumn`, `clusteredBar`, `stackedColumn`, `line`, `pie`, `donut`, `card`, `table`.
 - Aggregations: `sum`, `avg`, `count`, `countDistinct`, `min`, `max` (`agg` may be a list of acceptable values). `columns` is for `table` visuals only.
 - Filters: `op` ∈ `in`, `eq`, `gte`, `lte`, `between`.
 - Grading: type (20), each field/aggregation (8–12), data matches `referenceSql` (10), each filter (12), sort (8), title (6), and −4 per violated principle. If the student's data equals the reference data, field items are accepted even when the field choice differs.
 - The visual builder joins tables along foreign keys (shortest path), aggregates with GROUP BY, and applies the default sort (value-desc for bars/pies, axis-asc for lines) when the student has not chosen one; the effective sort is what gets graded.
+- **Calculated fields.** Students can define ad-hoc fields in any skin ("New measure / New column", "Create Calculated Field…", `mutate()`). An expression is SQLite syntax over column names written as `Column`, `Table.Column`, `Table[Column]` or `[Column]`; if it contains an aggregate (`SUM(Fee) / SUM(Views)`) it is used as-is as a measure, otherwise it is a row-level column that the well aggregates. Ambiguous bare column names must be qualified. Because grading accepts any visual whose data equals `referenceSql`, calculated fields never need to be declared in content.
+
+## `vizSprints[]` — timed chart drill
+
+```json
+{
+  "id": "dave-viz-sprint",
+  "company": "dave",
+  "title": "Dave's Gig Log — viz sprint",
+  "database": "dave",
+  "questions": [
+    {
+      "id": "dv20",
+      "topic": "calc",
+      "difficulty": 3,
+      "text": "Total pay including tips, per platform name. Define a calculated field: Earnings + Tips.",
+      "sql": "SELECT P.PlatformName, SUM(G.Earnings + G.Tips) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName",
+      "types": ["clusteredColumn", "clusteredBar"],
+      "params": { },
+      "orderMatters": false,
+      "requireTitle": false,
+      "hints": ["Create the field, then sum it on the y-axis."]
+    }
+  ]
+}
+```
+
+- Same template mechanics as `queries[]` (`{{params}}`, `values` / `from`, redraws on empty results, default points 10/15/20/30/40 by difficulty).
+- Grading per submit: the visual's data must equal the reference result (`compareResults`, row order only with `orderMatters`), `types` must include the student's visual type, `requireTitle` demands a title, and any machine-checked `viz.principles` violation blocks a correct answer. Everything else (field choice, aggregation, calculated fields) is free.
+- The reference SQL must return the dimensions first, then one column per measure; a card returns one column, one row. See `prompts/06-viz-sprint-pack.md`.
+- Topics: `single-value`, `compare`, `trend`, `part-whole`, `table`, `filter`, `calc`, `two-dim`, `sort`.

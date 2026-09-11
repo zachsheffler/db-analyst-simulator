@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
  * Named slots: a module deep in the main panel can render content into the
  * "help" and "controls" panels of the 2x2 workspace via portals.
  */
-export type SlotName = 'help' | 'controls'
+export type SlotName = 'help' | 'controls' | 'controlsTitle'
 
 interface SlotsState {
   els: Partial<Record<SlotName, HTMLElement | null>>
@@ -25,18 +25,26 @@ export function SlotsProvider({ children }: { children: ReactNode }) {
 }
 
 /** The panel that receives slot content. Shows `fallback` when nothing is rendered into it. */
-export function SlotOutlet({ name, fallback, className }: { name: SlotName; fallback?: ReactNode; className?: string }) {
+export function SlotOutlet({ name, fallback, className, inline }: { name: SlotName; fallback?: ReactNode; className?: string; inline?: boolean }) {
   const ctx = useContext(Ctx)!
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement & HTMLSpanElement>(null)
   const { setEl } = ctx
   useEffect(() => {
     setEl(name, ref.current)
     return () => setEl(name, null)
   }, [name, setEl])
   const filled = (ctx.counts[name] ?? 0) > 0
+  // The fallback is always wrapped in an element: a bare string child would make React
+  // manage the container's textContent, which wipes out the portal's nodes.
+  if (inline)
+    return (
+      <span className={className} ref={ref}>
+        {!filled && <span className="slot-fallback">{fallback}</span>}
+      </span>
+    )
   return (
     <div className={className} ref={ref}>
-      {!filled && fallback}
+      {!filled && <div className="slot-fallback">{fallback}</div>}
     </div>
   )
 }

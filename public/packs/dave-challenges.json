@@ -20,88 +20,284 @@
           {
             "name": "VEHICLE",
             "attributes": [
-              { "name": "VehicleID", "aliases": ["ID", "VehicleNo"], "key": true },
-              { "name": "Nickname", "aliases": ["Name", "VehicleName"] },
-              { "name": "VehicleType", "aliases": ["Type"] },
-              { "name": "ModelYear", "aliases": ["Year"] },
-              { "name": "CostPerMile", "aliases": ["CostMile", "MileCost"] }
+              {
+                "name": "VehicleID",
+                "aliases": [
+                  "ID",
+                  "VehicleNo"
+                ],
+                "key": true
+              },
+              {
+                "name": "Nickname",
+                "aliases": [
+                  "Name",
+                  "VehicleName"
+                ]
+              },
+              {
+                "name": "VehicleType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "ModelYear",
+                "aliases": [
+                  "Year"
+                ]
+              },
+              {
+                "name": "CostPerMile",
+                "aliases": [
+                  "CostMile",
+                  "MileCost"
+                ]
+              }
             ]
           },
           {
             "name": "PLATFORM",
-            "aliases": ["App", "GigApp"],
+            "aliases": [
+              "App",
+              "GigApp"
+            ],
             "attributes": [
-              { "name": "PlatformID", "aliases": ["ID", "AppID"], "key": true },
-              { "name": "PlatformName", "aliases": ["Name", "AppName"] },
-              { "name": "ServiceType", "aliases": ["Type", "Service"] },
-              { "name": "CommissionPct", "aliases": ["Commission", "CommissionPercent", "CommissionRate"] }
+              {
+                "name": "PlatformID",
+                "aliases": [
+                  "ID",
+                  "AppID"
+                ],
+                "key": true
+              },
+              {
+                "name": "PlatformName",
+                "aliases": [
+                  "Name",
+                  "AppName"
+                ]
+              },
+              {
+                "name": "ServiceType",
+                "aliases": [
+                  "Type",
+                  "Service"
+                ]
+              },
+              {
+                "name": "CommissionPct",
+                "aliases": [
+                  "Commission",
+                  "CommissionPercent",
+                  "CommissionRate"
+                ]
+              }
             ]
           },
           {
             "name": "GIG",
-            "aliases": ["Shift"],
+            "aliases": [
+              "Shift"
+            ],
             "attributes": [
-              { "name": "GigID", "aliases": ["ID", "ShiftID"], "key": true },
-              { "name": "GigDate", "aliases": ["Date", "ShiftDate"] },
-              { "name": "Hours", "aliases": ["HoursWorked"] },
-              { "name": "Miles", "aliases": ["MilesDriven", "Distance"] },
-              { "name": "Earnings", "aliases": ["Pay", "Earned", "Gross"] },
-              { "name": "Tips", "aliases": ["Tip"] },
-              { "name": "NetPay", "aliases": ["Net", "NetEarnings", "Take", "TakeHome"], "derived": true }
+              {
+                "name": "GigID",
+                "aliases": [
+                  "ID",
+                  "ShiftID"
+                ],
+                "key": true
+              },
+              {
+                "name": "GigDate",
+                "aliases": [
+                  "Date",
+                  "ShiftDate"
+                ]
+              },
+              {
+                "name": "Hours",
+                "aliases": [
+                  "HoursWorked"
+                ]
+              },
+              {
+                "name": "Miles",
+                "aliases": [
+                  "MilesDriven",
+                  "Distance"
+                ]
+              },
+              {
+                "name": "Earnings",
+                "aliases": [
+                  "Pay",
+                  "Earned",
+                  "Gross"
+                ]
+              },
+              {
+                "name": "Tips",
+                "aliases": [
+                  "Tip"
+                ]
+              },
+              {
+                "name": "NetPay",
+                "aliases": [
+                  "Net",
+                  "NetEarnings",
+                  "Take",
+                  "TakeHome"
+                ],
+                "derived": true
+              }
             ]
           },
           {
             "name": "EXPENSE",
             "attributes": [
-              { "name": "ExpenseID", "aliases": ["ID"], "key": true },
-              { "name": "ExpenseDate", "aliases": ["Date"] },
-              { "name": "Amount", "aliases": ["Cost"] },
-              { "name": "Note", "aliases": ["Notes", "Description"] }
+              {
+                "name": "ExpenseID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "ExpenseDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Amount",
+                "aliases": [
+                  "Cost"
+                ]
+              },
+              {
+                "name": "Note",
+                "aliases": [
+                  "Notes",
+                  "Description"
+                ]
+              }
             ]
           },
           {
             "name": "EXPENSE_CATEGORY",
-            "aliases": ["ExpenseCategory", "Category"],
+            "aliases": [
+              "ExpenseCategory",
+              "Category"
+            ],
             "attributes": [
-              { "name": "CategoryID", "aliases": ["ID"], "key": true },
-              { "name": "CategoryName", "aliases": ["Name"] }
+              {
+                "name": "CategoryID",
+                "aliases": [
+                  "ID"
+                ],
+                "key": true
+              },
+              {
+                "name": "CategoryName",
+                "aliases": [
+                  "Name"
+                ]
+              }
             ]
           }
         ],
         "relationships": [
           {
             "name": "UsedFor",
-            "aliases": ["Uses", "DoneWith", "Drives", "Has", "PerformedWith"],
+            "aliases": [
+              "Uses",
+              "DoneWith",
+              "Drives",
+              "Has",
+              "PerformedWith"
+            ],
             "sides": [
-              { "entity": "VEHICLE", "max": "1", "min": "mandatory" },
-              { "entity": "GIG", "max": "M", "min": "optional" }
+              {
+                "entity": "VEHICLE",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "GIG",
+                "max": "M",
+                "min": "optional"
+              }
             ],
             "rationale": "Each gig uses exactly one vehicle; a vehicle may be used for many gigs or none."
           },
           {
             "name": "WorkedOn",
-            "aliases": ["On", "Via", "Through", "Has", "Provides", "Offers"],
+            "aliases": [
+              "On",
+              "Via",
+              "Through",
+              "Has",
+              "Provides",
+              "Offers"
+            ],
             "sides": [
-              { "entity": "PLATFORM", "max": "1", "min": "mandatory" },
-              { "entity": "GIG", "max": "M", "min": "optional" }
+              {
+                "entity": "PLATFORM",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "GIG",
+                "max": "M",
+                "min": "optional"
+              }
             ],
             "rationale": "Each gig is on exactly one platform; a platform may have many gigs or none."
           },
           {
             "name": "Incurs",
-            "aliases": ["Has", "CostOf", "SpentOn", "For"],
+            "aliases": [
+              "Has",
+              "CostOf",
+              "SpentOn",
+              "For"
+            ],
             "sides": [
-              { "entity": "VEHICLE", "max": "1", "min": "optional" },
-              { "entity": "EXPENSE", "max": "M", "min": "optional" }
+              {
+                "entity": "VEHICLE",
+                "max": "1",
+                "min": "optional"
+              },
+              {
+                "entity": "EXPENSE",
+                "max": "M",
+                "min": "optional"
+              }
             ],
             "rationale": "An expense is tied to at most one vehicle and sometimes none (optional on the vehicle side); a vehicle may have many expenses or none."
           },
           {
             "name": "BelongsTo",
-            "aliases": ["In", "Categorizes", "Has", "ClassifiedAs"],
+            "aliases": [
+              "In",
+              "Categorizes",
+              "Has",
+              "ClassifiedAs"
+            ],
             "sides": [
-              { "entity": "EXPENSE_CATEGORY", "max": "1", "min": "mandatory" },
-              { "entity": "EXPENSE", "max": "M", "min": "optional" }
+              {
+                "entity": "EXPENSE_CATEGORY",
+                "max": "1",
+                "min": "mandatory"
+              },
+              {
+                "entity": "EXPENSE",
+                "max": "M",
+                "min": "optional"
+              }
             ],
             "rationale": "Every expense has exactly one category; a category may have many expenses or none."
           }
@@ -111,70 +307,249 @@
         "tables": [
           {
             "name": "VEHICLE",
-            "columns": [{ "name": "VehicleID", "aliases": ["ID"] }, { "name": "Nickname", "aliases": ["Name"] }, { "name": "VehicleType", "aliases": ["Type"] }, { "name": "ModelYear", "aliases": ["Year"] }, { "name": "CostPerMile" }],
-            "pk": ["VehicleID"],
+            "columns": [
+              {
+                "name": "VehicleID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "Nickname",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "VehicleType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "ModelYear",
+                "aliases": [
+                  "Year"
+                ]
+              },
+              {
+                "name": "CostPerMile"
+              }
+            ],
+            "pk": [
+              "VehicleID"
+            ],
             "fks": []
           },
           {
             "name": "PLATFORM",
-            "aliases": ["App"],
-            "columns": [{ "name": "PlatformID", "aliases": ["ID"] }, { "name": "PlatformName", "aliases": ["Name"] }, { "name": "ServiceType", "aliases": ["Type"] }, { "name": "CommissionPct", "aliases": ["Commission"] }],
-            "pk": ["PlatformID"],
+            "aliases": [
+              "App"
+            ],
+            "columns": [
+              {
+                "name": "PlatformID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "PlatformName",
+                "aliases": [
+                  "Name"
+                ]
+              },
+              {
+                "name": "ServiceType",
+                "aliases": [
+                  "Type"
+                ]
+              },
+              {
+                "name": "CommissionPct",
+                "aliases": [
+                  "Commission"
+                ]
+              }
+            ],
+            "pk": [
+              "PlatformID"
+            ],
             "fks": []
           },
           {
             "name": "GIG",
-            "aliases": ["Shift"],
-            "columns": [
-              { "name": "GigID", "aliases": ["ID"] },
-              { "name": "GigDate", "aliases": ["Date"] },
-              { "name": "Hours" },
-              { "name": "Miles" },
-              { "name": "Earnings", "aliases": ["Pay"] },
-              { "name": "Tips" },
-              { "name": "PlatformID", "aliases": ["AppID"] },
-              { "name": "VehicleID" }
+            "aliases": [
+              "Shift"
             ],
-            "pk": ["GigID"],
+            "columns": [
+              {
+                "name": "GigID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "GigDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Hours"
+              },
+              {
+                "name": "Miles"
+              },
+              {
+                "name": "Earnings",
+                "aliases": [
+                  "Pay"
+                ]
+              },
+              {
+                "name": "Tips"
+              },
+              {
+                "name": "PlatformID",
+                "aliases": [
+                  "AppID"
+                ]
+              },
+              {
+                "name": "VehicleID"
+              }
+            ],
+            "pk": [
+              "GigID"
+            ],
             "fks": [
-              { "columns": ["PlatformID"], "refTable": "PLATFORM" },
-              { "columns": ["VehicleID"], "refTable": "VEHICLE" }
+              {
+                "columns": [
+                  "PlatformID"
+                ],
+                "refTable": "PLATFORM"
+              },
+              {
+                "columns": [
+                  "VehicleID"
+                ],
+                "refTable": "VEHICLE"
+              }
             ]
           },
           {
             "name": "EXPENSE_CATEGORY",
-            "aliases": ["ExpenseCategory", "Category"],
-            "columns": [{ "name": "CategoryID", "aliases": ["ID"] }, { "name": "CategoryName", "aliases": ["Name"] }],
-            "pk": ["CategoryID"],
+            "aliases": [
+              "ExpenseCategory",
+              "Category"
+            ],
+            "columns": [
+              {
+                "name": "CategoryID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "CategoryName",
+                "aliases": [
+                  "Name"
+                ]
+              }
+            ],
+            "pk": [
+              "CategoryID"
+            ],
             "fks": []
           },
           {
             "name": "EXPENSE",
             "columns": [
-              { "name": "ExpenseID", "aliases": ["ID"] },
-              { "name": "ExpenseDate", "aliases": ["Date"] },
-              { "name": "Amount" },
-              { "name": "Note", "aliases": ["Notes"] },
-              { "name": "VehicleID", "nullable": true },
-              { "name": "CategoryID" }
+              {
+                "name": "ExpenseID",
+                "aliases": [
+                  "ID"
+                ]
+              },
+              {
+                "name": "ExpenseDate",
+                "aliases": [
+                  "Date"
+                ]
+              },
+              {
+                "name": "Amount"
+              },
+              {
+                "name": "Note",
+                "aliases": [
+                  "Notes"
+                ]
+              },
+              {
+                "name": "VehicleID",
+                "nullable": true
+              },
+              {
+                "name": "CategoryID"
+              }
             ],
-            "pk": ["ExpenseID"],
+            "pk": [
+              "ExpenseID"
+            ],
             "fks": [
-              { "columns": ["VehicleID"], "refTable": "VEHICLE" },
-              { "columns": ["CategoryID"], "refTable": "EXPENSE_CATEGORY" }
+              {
+                "columns": [
+                  "VehicleID"
+                ],
+                "refTable": "VEHICLE"
+              },
+              {
+                "columns": [
+                  "CategoryID"
+                ],
+                "refTable": "EXPENSE_CATEGORY"
+              }
             ]
           }
         ],
-        "notes": ["NetPay is derived, so it is not a column. EXPENSE.VehicleID must allow NULL because the phone plan is not tied to a vehicle."]
+        "notes": [
+          "NetPay is derived, so it is not a column. EXPENSE.VehicleID must allow NULL because the phone plan is not tied to a vehicle."
+        ]
       },
       "ddl": {
         "tests": [
-          { "description": "Dave's three vehicles insert cleanly.", "sql": "INSERT INTO VEHICLE (VehicleID, Nickname, VehicleType, ModelYear, CostPerMile) VALUES (1, 'The Corolla', 'Car', 2016, 0.32); INSERT INTO VEHICLE (VehicleID, Nickname, VehicleType, ModelYear, CostPerMile) VALUES (2, 'Vespa', 'Scooter', 2020, 0.11)", "expect": "ok" },
-          { "description": "A platform and a gig insert cleanly.", "sql": "INSERT INTO PLATFORM (PlatformID, PlatformName, ServiceType, CommissionPct) VALUES (1, 'DashRush', 'Food delivery', 20); INSERT INTO GIG (GigID, GigDate, Hours, Miles, Earnings, Tips, PlatformID, VehicleID) VALUES (1, '2025-03-01', 4.5, 38.2, 71.5, 12.0, 1, 2)", "expect": "ok" },
-          { "description": "A gig on a platform that does not exist is rejected.", "sql": "INSERT INTO GIG (GigID, GigDate, Hours, Miles, Earnings, Tips, PlatformID, VehicleID) VALUES (2, '2025-03-02', 3, 20, 50, 5, 99, 1)", "expect": "error" },
-          { "description": "A phone-plan expense with no vehicle is allowed.", "sql": "INSERT INTO EXPENSE_CATEGORY (CategoryID, CategoryName) VALUES (4, 'Phone'); INSERT INTO EXPENSE (ExpenseID, ExpenseDate, Amount, Note, VehicleID, CategoryID) VALUES (1, '2025-03-01', 45, 'Phone plan', NULL, 4)", "expect": "ok" },
-          { "description": "An expense in a category that does not exist is rejected.", "sql": "INSERT INTO EXPENSE (ExpenseID, ExpenseDate, Amount, Note, VehicleID, CategoryID) VALUES (2, '2025-03-01', 30, 'Gas', 1, 42)", "expect": "error" },
-          { "description": "A duplicate vehicle ID is rejected.", "sql": "INSERT INTO VEHICLE (VehicleID, Nickname, VehicleType, ModelYear, CostPerMile) VALUES (1, 'Twin', 'Car', 2016, 0.3)", "expect": "error" }
+          {
+            "description": "Dave's three vehicles insert cleanly.",
+            "sql": "INSERT INTO VEHICLE (VehicleID, Nickname, VehicleType, ModelYear, CostPerMile) VALUES (1, 'The Corolla', 'Car', 2016, 0.32); INSERT INTO VEHICLE (VehicleID, Nickname, VehicleType, ModelYear, CostPerMile) VALUES (2, 'Vespa', 'Scooter', 2020, 0.11)",
+            "expect": "ok"
+          },
+          {
+            "description": "A platform and a gig insert cleanly.",
+            "sql": "INSERT INTO PLATFORM (PlatformID, PlatformName, ServiceType, CommissionPct) VALUES (1, 'DashRush', 'Food delivery', 20); INSERT INTO GIG (GigID, GigDate, Hours, Miles, Earnings, Tips, PlatformID, VehicleID) VALUES (1, '2025-03-01', 4.5, 38.2, 71.5, 12.0, 1, 2)",
+            "expect": "ok"
+          },
+          {
+            "description": "A gig on a platform that does not exist is rejected.",
+            "sql": "INSERT INTO GIG (GigID, GigDate, Hours, Miles, Earnings, Tips, PlatformID, VehicleID) VALUES (2, '2025-03-02', 3, 20, 50, 5, 99, 1)",
+            "expect": "error"
+          },
+          {
+            "description": "A phone-plan expense with no vehicle is allowed.",
+            "sql": "INSERT INTO EXPENSE_CATEGORY (CategoryID, CategoryName) VALUES (4, 'Phone'); INSERT INTO EXPENSE (ExpenseID, ExpenseDate, Amount, Note, VehicleID, CategoryID) VALUES (1, '2025-03-01', 45, 'Phone plan', NULL, 4)",
+            "expect": "ok"
+          },
+          {
+            "description": "An expense in a category that does not exist is rejected.",
+            "sql": "INSERT INTO EXPENSE (ExpenseID, ExpenseDate, Amount, Note, VehicleID, CategoryID) VALUES (2, '2025-03-01', 30, 'Gas', 1, 42)",
+            "expect": "error"
+          },
+          {
+            "description": "A duplicate vehicle ID is rejected.",
+            "sql": "INSERT INTO VEHICLE (VehicleID, Nickname, VehicleType, ModelYear, CostPerMile) VALUES (1, 'Twin', 'Car', 2016, 0.3)",
+            "expect": "error"
+          }
         ]
       }
     }
@@ -186,36 +561,348 @@
       "title": "Dave's gig log — SQL sprint",
       "database": "dave",
       "questions": [
-        { "id": "d01", "topic": "select-basic", "difficulty": 1, "text": "List every column of every vehicle.", "sql": "SELECT * FROM Vehicle" },
-        { "id": "d02", "topic": "select-basic", "difficulty": 1, "text": "List the name and commission percentage of every platform.", "sql": "SELECT PlatformName, CommissionPct FROM Platform" },
-        { "id": "d03", "topic": "select-basic", "difficulty": 1, "text": "List the date, earnings and tips of every gig.", "sql": "SELECT GigDate, Earnings, Tips FROM Gig" },
-        { "id": "d04", "topic": "select-where", "difficulty": 1, "text": "List the gig ID and earnings of gigs that earned more than ${{amt}} (before tips).", "sql": "SELECT GigID, Earnings FROM Gig WHERE Earnings > {{amt}}", "params": { "amt": { "values": [100, 120, 140] } } },
-        { "id": "d05", "topic": "select-where", "difficulty": 1, "text": "List the gig ID, date and hours of gigs done with vehicle {{vid}}.", "sql": "SELECT GigID, GigDate, Hours FROM Gig WHERE VehicleID = {{vid}}", "params": { "vid": { "values": [1, 2, 3] } } },
-        { "id": "d06", "topic": "select-where", "difficulty": 2, "text": "List the gig ID and miles of gigs in {{month}} (YYYY-MM) with more than {{mi}} miles.", "sql": "SELECT GigID, Miles FROM Gig WHERE GigMonth = '{{month}}' AND Miles > {{mi}}", "params": { "month": { "from": "SELECT DISTINCT GigMonth FROM Gig" }, "mi": { "values": [20, 30, 40] } }, "hints": ["Two conditions joined with AND."] },
-        { "id": "d07", "topic": "distinct-order", "difficulty": 2, "text": "List the distinct service types offered by the platforms.", "sql": "SELECT DISTINCT ServiceType FROM Platform" },
-        { "id": "d08", "topic": "distinct-order", "difficulty": 2, "text": "List every gig's ID and earnings, highest earnings first.", "sql": "SELECT GigID, Earnings FROM Gig ORDER BY Earnings DESC", "orderMatters": true },
-        { "id": "d09", "topic": "like-in-between", "difficulty": 2, "text": "List the expense ID, amount and note of expenses whose note contains '{{word}}'.", "sql": "SELECT ExpenseID, Amount, Note FROM Expense WHERE Note LIKE '%{{word}}%'", "params": { "word": { "values": ["Gas", "Parking", "Phone", "Oil", "Tires"] } } },
-        { "id": "d10", "topic": "like-in-between", "difficulty": 2, "text": "List the gig ID and hours of gigs lasting between {{lo}} and {{hi}} hours inclusive.", "sql": "SELECT GigID, Hours FROM Gig WHERE Hours BETWEEN {{lo}} AND {{hi}}", "params": { "lo": { "values": [2, 3] }, "hi": { "values": [3.5, 4, 5] } } },
-        { "id": "d11", "topic": "aggregate", "difficulty": 2, "text": "How many gigs has Dave logged in total? Return a single number.", "sql": "SELECT COUNT(*) FROM Gig" },
-        { "id": "d12", "topic": "aggregate", "difficulty": 2, "text": "What are Dave's total earnings and total tips across all gigs? Return both in one row.", "sql": "SELECT SUM(Earnings), SUM(Tips) FROM Gig" },
-        { "id": "d13", "topic": "aggregate", "difficulty": 2, "text": "What is the total amount of expenses in {{month}} (YYYY-MM)? Return a single number.", "sql": "SELECT SUM(Amount) FROM Expense WHERE ExpenseMonth = '{{month}}'", "params": { "month": { "from": "SELECT DISTINCT ExpenseMonth FROM Expense" } } },
-        { "id": "d14", "topic": "aggregate", "difficulty": 3, "text": "What is the average earnings per gig on platform {{pid}}, rounded to 2 decimals? Return a single number.", "sql": "SELECT ROUND(AVG(Earnings), 2) FROM Gig WHERE PlatformID = {{pid}}", "params": { "pid": { "values": [1, 2, 3, 4] } } },
-        { "id": "d15", "topic": "group-by", "difficulty": 3, "text": "For each vehicle ID, show the vehicle ID and the number of gigs done with it.", "sql": "SELECT VehicleID, COUNT(*) FROM Gig GROUP BY VehicleID" },
-        { "id": "d16", "topic": "group-by", "difficulty": 3, "text": "For each platform ID, show the platform ID and total earnings (before tips).", "sql": "SELECT PlatformID, SUM(Earnings) FROM Gig GROUP BY PlatformID" },
-        { "id": "d17", "topic": "group-by", "difficulty": 3, "text": "Show total expenses per month: the month (YYYY-MM) and the sum of amounts, in chronological order.", "sql": "SELECT ExpenseMonth, SUM(Amount) FROM Expense GROUP BY ExpenseMonth ORDER BY ExpenseMonth", "orderMatters": true },
-        { "id": "d18", "topic": "having", "difficulty": 3, "text": "Show the months (YYYY-MM) in which Dave logged more than {{n}} gigs, with the count.", "sql": "SELECT GigMonth, COUNT(*) FROM Gig GROUP BY GigMonth HAVING COUNT(*) > {{n}}", "params": { "n": { "values": [32, 35, 38] } }, "hints": ["A condition on COUNT(*) belongs in HAVING."] },
-        { "id": "d19", "topic": "join", "difficulty": 3, "text": "List each gig's date and earnings together with the platform name.", "sql": "SELECT G.GigDate, G.Earnings, P.PlatformName FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID" },
-        { "id": "d20", "topic": "join", "difficulty": 3, "text": "List the expense date, amount and category name for every expense in category '{{cat}}'.", "sql": "SELECT E.ExpenseDate, E.Amount, C.CategoryName FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID WHERE C.CategoryName = '{{cat}}'", "params": { "cat": { "from": "SELECT CategoryName FROM ExpenseCategory" } } },
-        { "id": "d21", "topic": "join", "difficulty": 3, "text": "For each vehicle nickname, show the nickname and the total miles driven on gigs.", "sql": "SELECT V.Nickname, SUM(G.Miles) FROM Gig G JOIN Vehicle V ON G.VehicleID = V.VehicleID GROUP BY V.Nickname" },
-        { "id": "d22", "topic": "multi-join", "difficulty": 3, "text": "For each platform name, show the name and the average hours per gig, rounded to 2 decimals.", "sql": "SELECT P.PlatformName, ROUND(AVG(G.Hours), 2) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName" },
-        { "id": "d23", "topic": "alias", "difficulty": 3, "text": "For every gig, show the gig ID and the pay per hour (earnings plus tips, divided by hours), rounded to 2 decimals.", "sql": "SELECT GigID, ROUND((Earnings + Tips) / Hours, 2) AS PayPerHour FROM Gig", "hints": ["Arithmetic in the SELECT list; name the result with AS."] },
-        { "id": "d24", "topic": "multi-join", "difficulty": 4, "text": "For each vehicle nickname, show the nickname and the total expenses tied to that vehicle in category '{{cat}}'.", "sql": "SELECT V.Nickname, SUM(E.Amount) FROM Expense E JOIN Vehicle V ON E.VehicleID = V.VehicleID JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID WHERE C.CategoryName = '{{cat}}' GROUP BY V.Nickname", "params": { "cat": { "values": ["Fuel", "Maintenance", "Parking"] } } },
-        { "id": "d25", "topic": "null", "difficulty": 3, "text": "List the expense ID, amount and note of expenses that are not tied to any vehicle.", "sql": "SELECT ExpenseID, Amount, Note FROM Expense WHERE VehicleID IS NULL", "hints": ["Use IS NULL."] },
-        { "id": "d26", "topic": "subquery", "difficulty": 4, "text": "List the gig ID and earnings of gigs that earned more than the average gig earnings.", "sql": "SELECT GigID, Earnings FROM Gig WHERE Earnings > (SELECT AVG(Earnings) FROM Gig)" },
-        { "id": "d27", "topic": "subquery", "difficulty": 4, "text": "List the nicknames of vehicles that have no expenses recorded in category '{{cat}}'.", "sql": "SELECT Nickname FROM Vehicle WHERE VehicleID NOT IN (SELECT VehicleID FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID WHERE C.CategoryName = '{{cat}}' AND VehicleID IS NOT NULL)", "params": { "cat": { "values": ["Fuel", "Maintenance", "Gear"] } }, "hints": ["NOT IN with a subquery; make sure the subquery does not return NULLs."] },
-        { "id": "d28", "topic": "outer-join", "difficulty": 4, "text": "List every platform name with the number of gigs done on it, including platforms with zero gigs.", "sql": "SELECT P.PlatformName, COUNT(G.GigID) FROM Platform P LEFT JOIN Gig G ON P.PlatformID = G.PlatformID GROUP BY P.PlatformID, P.PlatformName", "hints": ["LEFT JOIN from Platform; COUNT a Gig column so empty platforms show 0."] },
-        { "id": "d29", "topic": "multi-join", "difficulty": 4, "text": "For each service type, show the service type and total tips earned.", "sql": "SELECT P.ServiceType, SUM(G.Tips) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.ServiceType" },
-        { "id": "d30", "topic": "having", "difficulty": 4, "text": "Show the vehicle IDs whose gigs have earned more than ${{amt}} in total (earnings only), with the total.", "sql": "SELECT VehicleID, SUM(Earnings) FROM Gig GROUP BY VehicleID HAVING SUM(Earnings) > {{amt}}", "params": { "amt": { "values": [5000, 8000, 12000] } } }
+        {
+          "id": "d01",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "List every column of every vehicle.",
+          "sql": "SELECT * FROM Vehicle"
+        },
+        {
+          "id": "d02",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "List the name and commission percentage of every platform.",
+          "sql": "SELECT PlatformName, CommissionPct FROM Platform"
+        },
+        {
+          "id": "d03",
+          "topic": "select-basic",
+          "difficulty": 1,
+          "text": "List the date, earnings and tips of every gig.",
+          "sql": "SELECT GigDate, Earnings, Tips FROM Gig"
+        },
+        {
+          "id": "d04",
+          "topic": "select-where",
+          "difficulty": 1,
+          "text": "List the gig ID and earnings of gigs that earned more than ${{amt}} (before tips).",
+          "sql": "SELECT GigID, Earnings FROM Gig WHERE Earnings > {{amt}}",
+          "params": {
+            "amt": {
+              "values": [
+                100,
+                120,
+                140
+              ]
+            }
+          }
+        },
+        {
+          "id": "d05",
+          "topic": "select-where",
+          "difficulty": 1,
+          "text": "List the gig ID, date and hours of gigs done with vehicle {{vid}}.",
+          "sql": "SELECT GigID, GigDate, Hours FROM Gig WHERE VehicleID = {{vid}}",
+          "params": {
+            "vid": {
+              "values": [
+                1,
+                2,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "id": "d06",
+          "topic": "select-where",
+          "difficulty": 2,
+          "text": "List the gig ID and miles of gigs in {{month}} (YYYY-MM) with more than {{mi}} miles.",
+          "sql": "SELECT GigID, Miles FROM Gig WHERE GigMonth = '{{month}}' AND Miles > {{mi}}",
+          "params": {
+            "month": {
+              "from": "SELECT DISTINCT GigMonth FROM Gig"
+            },
+            "mi": {
+              "values": [
+                20,
+                30,
+                40
+              ]
+            }
+          },
+          "hints": [
+            "Two conditions joined with AND."
+          ]
+        },
+        {
+          "id": "d07",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List the distinct service types offered by the platforms.",
+          "sql": "SELECT DISTINCT ServiceType FROM Platform"
+        },
+        {
+          "id": "d08",
+          "topic": "distinct-order",
+          "difficulty": 2,
+          "text": "List every gig's ID and earnings, highest earnings first.",
+          "sql": "SELECT GigID, Earnings FROM Gig ORDER BY Earnings DESC",
+          "orderMatters": true
+        },
+        {
+          "id": "d09",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the expense ID, amount and note of expenses whose note contains '{{word}}'.",
+          "sql": "SELECT ExpenseID, Amount, Note FROM Expense WHERE Note LIKE '%{{word}}%'",
+          "params": {
+            "word": {
+              "values": [
+                "Gas",
+                "Parking",
+                "Phone",
+                "Oil",
+                "Tires"
+              ]
+            }
+          }
+        },
+        {
+          "id": "d10",
+          "topic": "like-in-between",
+          "difficulty": 2,
+          "text": "List the gig ID and hours of gigs lasting between {{lo}} and {{hi}} hours inclusive.",
+          "sql": "SELECT GigID, Hours FROM Gig WHERE Hours BETWEEN {{lo}} AND {{hi}}",
+          "params": {
+            "lo": {
+              "values": [
+                2,
+                3
+              ]
+            },
+            "hi": {
+              "values": [
+                3.5,
+                4,
+                5
+              ]
+            }
+          }
+        },
+        {
+          "id": "d11",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "How many gigs has Dave logged in total? Return a single number.",
+          "sql": "SELECT COUNT(*) FROM Gig"
+        },
+        {
+          "id": "d12",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "What are Dave's total earnings and total tips across all gigs? Return both in one row.",
+          "sql": "SELECT SUM(Earnings), SUM(Tips) FROM Gig"
+        },
+        {
+          "id": "d13",
+          "topic": "aggregate",
+          "difficulty": 2,
+          "text": "What is the total amount of expenses in {{month}} (YYYY-MM)? Return a single number.",
+          "sql": "SELECT SUM(Amount) FROM Expense WHERE ExpenseMonth = '{{month}}'",
+          "params": {
+            "month": {
+              "from": "SELECT DISTINCT ExpenseMonth FROM Expense"
+            }
+          }
+        },
+        {
+          "id": "d14",
+          "topic": "aggregate",
+          "difficulty": 3,
+          "text": "What is the average earnings per gig on platform {{pid}}, rounded to 2 decimals? Return a single number.",
+          "sql": "SELECT ROUND(AVG(Earnings), 2) FROM Gig WHERE PlatformID = {{pid}}",
+          "params": {
+            "pid": {
+              "values": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          }
+        },
+        {
+          "id": "d15",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each vehicle ID, show the vehicle ID and the number of gigs done with it.",
+          "sql": "SELECT VehicleID, COUNT(*) FROM Gig GROUP BY VehicleID"
+        },
+        {
+          "id": "d16",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "For each platform ID, show the platform ID and total earnings (before tips).",
+          "sql": "SELECT PlatformID, SUM(Earnings) FROM Gig GROUP BY PlatformID"
+        },
+        {
+          "id": "d17",
+          "topic": "group-by",
+          "difficulty": 3,
+          "text": "Show total expenses per month: the month (YYYY-MM) and the sum of amounts, in chronological order.",
+          "sql": "SELECT ExpenseMonth, SUM(Amount) FROM Expense GROUP BY ExpenseMonth ORDER BY ExpenseMonth",
+          "orderMatters": true
+        },
+        {
+          "id": "d18",
+          "topic": "having",
+          "difficulty": 3,
+          "text": "Show the months (YYYY-MM) in which Dave logged more than {{n}} gigs, with the count.",
+          "sql": "SELECT GigMonth, COUNT(*) FROM Gig GROUP BY GigMonth HAVING COUNT(*) > {{n}}",
+          "params": {
+            "n": {
+              "values": [
+                32,
+                35,
+                38
+              ]
+            }
+          },
+          "hints": [
+            "A condition on COUNT(*) belongs in HAVING."
+          ]
+        },
+        {
+          "id": "d19",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List each gig's date and earnings together with the platform name.",
+          "sql": "SELECT G.GigDate, G.Earnings, P.PlatformName FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID"
+        },
+        {
+          "id": "d20",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "List the expense date, amount and category name for every expense in category '{{cat}}'.",
+          "sql": "SELECT E.ExpenseDate, E.Amount, C.CategoryName FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID WHERE C.CategoryName = '{{cat}}'",
+          "params": {
+            "cat": {
+              "from": "SELECT CategoryName FROM ExpenseCategory"
+            }
+          }
+        },
+        {
+          "id": "d21",
+          "topic": "join",
+          "difficulty": 3,
+          "text": "For each vehicle nickname, show the nickname and the total miles driven on gigs.",
+          "sql": "SELECT V.Nickname, SUM(G.Miles) FROM Gig G JOIN Vehicle V ON G.VehicleID = V.VehicleID GROUP BY V.Nickname"
+        },
+        {
+          "id": "d22",
+          "topic": "multi-join",
+          "difficulty": 3,
+          "text": "For each platform name, show the name and the average hours per gig, rounded to 2 decimals.",
+          "sql": "SELECT P.PlatformName, ROUND(AVG(G.Hours), 2) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName"
+        },
+        {
+          "id": "d23",
+          "topic": "alias",
+          "difficulty": 3,
+          "text": "For every gig, show the gig ID and the pay per hour (earnings plus tips, divided by hours), rounded to 2 decimals.",
+          "sql": "SELECT GigID, ROUND((Earnings + Tips) / Hours, 2) AS PayPerHour FROM Gig",
+          "hints": [
+            "Arithmetic in the SELECT list; name the result with AS."
+          ]
+        },
+        {
+          "id": "d24",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For each vehicle nickname, show the nickname and the total expenses tied to that vehicle in category '{{cat}}'.",
+          "sql": "SELECT V.Nickname, SUM(E.Amount) FROM Expense E JOIN Vehicle V ON E.VehicleID = V.VehicleID JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID WHERE C.CategoryName = '{{cat}}' GROUP BY V.Nickname",
+          "params": {
+            "cat": {
+              "values": [
+                "Fuel",
+                "Maintenance",
+                "Parking"
+              ]
+            }
+          }
+        },
+        {
+          "id": "d25",
+          "topic": "null",
+          "difficulty": 3,
+          "text": "List the expense ID, amount and note of expenses that are not tied to any vehicle.",
+          "sql": "SELECT ExpenseID, Amount, Note FROM Expense WHERE VehicleID IS NULL",
+          "hints": [
+            "Use IS NULL."
+          ]
+        },
+        {
+          "id": "d26",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the gig ID and earnings of gigs that earned more than the average gig earnings.",
+          "sql": "SELECT GigID, Earnings FROM Gig WHERE Earnings > (SELECT AVG(Earnings) FROM Gig)"
+        },
+        {
+          "id": "d27",
+          "topic": "subquery",
+          "difficulty": 4,
+          "text": "List the nicknames of vehicles that have no expenses recorded in category '{{cat}}'.",
+          "sql": "SELECT Nickname FROM Vehicle WHERE VehicleID NOT IN (SELECT VehicleID FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID WHERE C.CategoryName = '{{cat}}' AND VehicleID IS NOT NULL)",
+          "params": {
+            "cat": {
+              "values": [
+                "Fuel",
+                "Maintenance",
+                "Gear"
+              ]
+            }
+          },
+          "hints": [
+            "NOT IN with a subquery; make sure the subquery does not return NULLs."
+          ]
+        },
+        {
+          "id": "d28",
+          "topic": "outer-join",
+          "difficulty": 4,
+          "text": "List every platform name with the number of gigs done on it, including platforms with zero gigs.",
+          "sql": "SELECT P.PlatformName, COUNT(G.GigID) FROM Platform P LEFT JOIN Gig G ON P.PlatformID = G.PlatformID GROUP BY P.PlatformID, P.PlatformName",
+          "hints": [
+            "LEFT JOIN from Platform; COUNT a Gig column so empty platforms show 0."
+          ]
+        },
+        {
+          "id": "d29",
+          "topic": "multi-join",
+          "difficulty": 4,
+          "text": "For each service type, show the service type and total tips earned.",
+          "sql": "SELECT P.ServiceType, SUM(G.Tips) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.ServiceType"
+        },
+        {
+          "id": "d30",
+          "topic": "having",
+          "difficulty": 4,
+          "text": "Show the vehicle IDs whose gigs have earned more than ${{amt}} in total (earnings only), with the total.",
+          "sql": "SELECT VehicleID, SUM(Earnings) FROM Gig GROUP BY VehicleID HAVING SUM(Earnings) > {{amt}}",
+          "params": {
+            "amt": {
+              "values": [
+                5000,
+                8000,
+                12000
+              ]
+            }
+          }
+        }
       ]
     }
   ],
@@ -227,8 +914,24 @@
       "difficulty": 1,
       "database": "dave",
       "brief": "Dave asks: \"Just tell me one number: how much did I earn in total, before tips?\" Build a visual that shows exactly that.",
-      "hints": ["A card shows a single value.", "Earnings lives in the Gig table."],
-      "expected": { "types": ["card"], "values": [{ "field": { "table": "Gig", "column": "Earnings" }, "agg": "sum" }] },
+      "hints": [
+        "A card shows a single value.",
+        "Earnings lives in the Gig table."
+      ],
+      "expected": {
+        "types": [
+          "card"
+        ],
+        "values": [
+          {
+            "field": {
+              "table": "Gig",
+              "column": "Earnings"
+            },
+            "agg": "sum"
+          }
+        ]
+      },
       "referenceSql": "SELECT SUM(Earnings) FROM Gig"
     },
     {
@@ -238,12 +941,32 @@
       "difficulty": 2,
       "database": "dave",
       "brief": "Dave wants to compare the apps: total earnings for each platform name, biggest first, with a title he can screenshot.",
-      "hints": ["Platform names are categories: bars or columns.", "Sort by value, descending."],
+      "hints": [
+        "Platform names are categories: bars or columns.",
+        "Sort by value, descending."
+      ],
       "expected": {
-        "types": ["clusteredBar", "clusteredColumn"],
-        "axis": { "table": "Platform", "column": "PlatformName" },
-        "values": [{ "field": { "table": "Gig", "column": "Earnings" }, "agg": "sum" }],
-        "sort": { "by": "value", "dir": "desc" },
+        "types": [
+          "clusteredBar",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "Platform",
+          "column": "PlatformName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "Gig",
+              "column": "Earnings"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        },
         "requireTitle": true
       },
       "referenceSql": "SELECT P.PlatformName, SUM(G.Earnings) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName ORDER BY 2 DESC"
@@ -255,12 +978,31 @@
       "difficulty": 2,
       "database": "dave",
       "brief": "Dave wants to see how his monthly earnings (before tips) changed over 2025, month by month in order, with a title.",
-      "hints": ["Months in order call for a line chart.", "GigMonth is already stored as YYYY-MM."],
+      "hints": [
+        "Months in order call for a line chart.",
+        "GigMonth is already stored as YYYY-MM."
+      ],
       "expected": {
-        "types": ["line"],
-        "axis": { "table": "Gig", "column": "GigMonth" },
-        "values": [{ "field": { "table": "Gig", "column": "Earnings" }, "agg": "sum" }],
-        "sort": { "by": "axis", "dir": "asc" },
+        "types": [
+          "line"
+        ],
+        "axis": {
+          "table": "Gig",
+          "column": "GigMonth"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "Gig",
+              "column": "Earnings"
+            },
+            "agg": "sum"
+          }
+        ],
+        "sort": {
+          "by": "axis",
+          "dir": "asc"
+        },
         "requireTitle": true
       },
       "referenceSql": "SELECT GigMonth, SUM(Earnings) FROM Gig GROUP BY GigMonth ORDER BY 1"
@@ -272,11 +1014,30 @@
       "difficulty": 2,
       "database": "dave",
       "brief": "Dave asks what share of his expenses goes to each category (by category name), as parts of a whole. Add a title.",
-      "hints": ["Six categories: a pie or donut is acceptable here.", "Sum the Amount column."],
+      "hints": [
+        "Six categories: a pie or donut is acceptable here.",
+        "Sum the Amount column."
+      ],
       "expected": {
-        "types": ["pie", "donut", "clusteredBar", "clusteredColumn"],
-        "axis": { "table": "ExpenseCategory", "column": "CategoryName" },
-        "values": [{ "field": { "table": "Expense", "column": "Amount" }, "agg": "sum" }],
+        "types": [
+          "pie",
+          "donut",
+          "clusteredBar",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "ExpenseCategory",
+          "column": "CategoryName"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "Expense",
+              "column": "Amount"
+            },
+            "agg": "sum"
+          }
+        ],
         "requireTitle": true
       },
       "referenceSql": "SELECT C.CategoryName, SUM(E.Amount) FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID GROUP BY C.CategoryName ORDER BY 2 DESC"
@@ -288,13 +1049,44 @@
       "difficulty": 3,
       "database": "dave",
       "brief": "Dave suspects the car is expensive. Show his monthly expenses (by ExpenseMonth, in order) for the vehicle nicknamed 'The Corolla' only, with a title.",
-      "hints": ["Filter on the vehicle's Nickname rather than on an ID.", "Months in order: a line, or columns if you prefer."],
+      "hints": [
+        "Filter on the vehicle's Nickname rather than on an ID.",
+        "Months in order: a line, or columns if you prefer."
+      ],
       "expected": {
-        "types": ["line", "clusteredColumn"],
-        "axis": { "table": "Expense", "column": "ExpenseMonth" },
-        "values": [{ "field": { "table": "Expense", "column": "Amount" }, "agg": "sum" }],
-        "filters": [{ "field": { "table": "Vehicle", "column": "Nickname" }, "op": "in", "values": ["The Corolla"] }],
-        "sort": { "by": "axis", "dir": "asc" },
+        "types": [
+          "line",
+          "clusteredColumn"
+        ],
+        "axis": {
+          "table": "Expense",
+          "column": "ExpenseMonth"
+        },
+        "values": [
+          {
+            "field": {
+              "table": "Expense",
+              "column": "Amount"
+            },
+            "agg": "sum"
+          }
+        ],
+        "filters": [
+          {
+            "field": {
+              "table": "Vehicle",
+              "column": "Nickname"
+            },
+            "op": "in",
+            "values": [
+              "The Corolla"
+            ]
+          }
+        ],
+        "sort": {
+          "by": "axis",
+          "dir": "asc"
+        },
         "requireTitle": true
       },
       "referenceSql": "SELECT E.ExpenseMonth, SUM(E.Amount) FROM Expense E JOIN Vehicle V ON E.VehicleID = V.VehicleID WHERE V.Nickname = 'The Corolla' GROUP BY E.ExpenseMonth ORDER BY 1"
@@ -306,17 +1098,397 @@
       "difficulty": 3,
       "database": "dave",
       "brief": "Dave wants exact numbers in a table: each vehicle nickname, its vehicle type, and the total miles driven on gigs, most miles first.",
-      "hints": ["Table visual; leave Nickname and VehicleType unsummarized.", "Sort by the value."],
+      "hints": [
+        "Table visual; leave Nickname and VehicleType unsummarized.",
+        "Sort by the value."
+      ],
       "expected": {
-        "types": ["table"],
-        "columns": [
-          { "table": "Vehicle", "column": "Nickname" },
-          { "table": "Vehicle", "column": "VehicleType" },
-          { "table": "Gig", "column": "Miles" }
+        "types": [
+          "table"
         ],
-        "sort": { "by": "value", "dir": "desc" }
+        "columns": [
+          {
+            "table": "Vehicle",
+            "column": "Nickname"
+          },
+          {
+            "table": "Vehicle",
+            "column": "VehicleType"
+          },
+          {
+            "table": "Gig",
+            "column": "Miles"
+          }
+        ],
+        "sort": {
+          "by": "value",
+          "dir": "desc"
+        }
       },
       "referenceSql": "SELECT V.Nickname, V.VehicleType, SUM(G.Miles) FROM Gig G JOIN Vehicle V ON G.VehicleID = V.VehicleID GROUP BY V.Nickname, V.VehicleType ORDER BY 3 DESC"
+    }
+  ],
+  "vizSprints": [
+    {
+      "id": "dave-viz-sprint",
+      "company": "dave",
+      "title": "Dave's Gig Log — viz sprint",
+      "database": "dave",
+      "questions": [
+        {
+          "id": "dv01",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: total earnings (before tips) across all of Dave's gigs.",
+          "sql": "SELECT SUM(Earnings) FROM Gig",
+          "types": [
+            "card"
+          ],
+          "hints": [
+            "A card shows a single value.",
+            "Earnings lives in Gig."
+          ]
+        },
+        {
+          "id": "dv02",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: how many gigs Dave has worked.",
+          "sql": "SELECT COUNT(GigID) FROM Gig",
+          "types": [
+            "card"
+          ],
+          "hints": [
+            "Count the gig IDs."
+          ]
+        },
+        {
+          "id": "dv03",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: the total tips Dave has received.",
+          "sql": "SELECT SUM(Tips) FROM Gig",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "dv04",
+          "topic": "single-value",
+          "difficulty": 2,
+          "text": "Show one number: the biggest single-gig earnings (before tips).",
+          "sql": "SELECT MAX(Earnings) FROM Gig",
+          "types": [
+            "card"
+          ],
+          "hints": [
+            "Change the aggregation on the value."
+          ]
+        },
+        {
+          "id": "dv05",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare total earnings (before tips) across the platforms, by platform name.",
+          "sql": "SELECT P.PlatformName, SUM(G.Earnings) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "hints": [
+            "Axis: PlatformName; values: sum of Earnings. The join is automatic."
+          ]
+        },
+        {
+          "id": "dv06",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare total miles driven per vehicle, by nickname.",
+          "sql": "SELECT V.Nickname, SUM(G.Miles) FROM Gig G JOIN Vehicle V ON G.VehicleID = V.VehicleID GROUP BY V.Nickname",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "dv07",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare the average hours per gig on each platform (by name).",
+          "sql": "SELECT P.PlatformName, AVG(G.Hours) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "hints": [
+            "Average, not sum."
+          ]
+        },
+        {
+          "id": "dv08",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare the number of gigs done with each vehicle type.",
+          "sql": "SELECT V.VehicleType, COUNT(G.GigID) FROM Gig G JOIN Vehicle V ON G.VehicleID = V.VehicleID GROUP BY V.VehicleType",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "dv09",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare the number of expenses recorded in each expense category (by name).",
+          "sql": "SELECT C.CategoryName, COUNT(E.ExpenseID) FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID GROUP BY C.CategoryName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "dv10",
+          "topic": "trend",
+          "difficulty": 2,
+          "text": "Show how total earnings (before tips) changed month by month. Use GigMonth.",
+          "sql": "SELECT GigMonth, SUM(Earnings) FROM Gig GROUP BY GigMonth",
+          "types": [
+            "line"
+          ],
+          "hints": [
+            "A trend over time wants a line."
+          ]
+        },
+        {
+          "id": "dv11",
+          "topic": "trend",
+          "difficulty": 2,
+          "text": "Show the monthly total of expenses over time (ExpenseMonth).",
+          "sql": "SELECT ExpenseMonth, SUM(Amount) FROM Expense GROUP BY ExpenseMonth",
+          "types": [
+            "line"
+          ]
+        },
+        {
+          "id": "dv12",
+          "topic": "trend",
+          "difficulty": 3,
+          "text": "A titled line chart of total miles per month (GigMonth). Give it a title.",
+          "sql": "SELECT GigMonth, SUM(Miles) FROM Gig GROUP BY GigMonth",
+          "types": [
+            "line"
+          ],
+          "requireTitle": true
+        },
+        {
+          "id": "dv13",
+          "topic": "part-whole",
+          "difficulty": 2,
+          "text": "Show each expense category's share of the total amount spent (by category name).",
+          "sql": "SELECT C.CategoryName, SUM(E.Amount) FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID GROUP BY C.CategoryName",
+          "types": [
+            "pie",
+            "donut",
+            "clusteredBar",
+            "clusteredColumn"
+          ],
+          "hints": [
+            "Six categories or fewer: a pie is fine; bars work too."
+          ]
+        },
+        {
+          "id": "dv14",
+          "topic": "part-whole",
+          "difficulty": 2,
+          "text": "Show how the number of gigs splits across service types (rideshare, food, package).",
+          "sql": "SELECT P.ServiceType, COUNT(G.GigID) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.ServiceType",
+          "types": [
+            "pie",
+            "donut",
+            "clusteredBar",
+            "clusteredColumn"
+          ]
+        },
+        {
+          "id": "dv15",
+          "topic": "table",
+          "difficulty": 2,
+          "text": "A table listing every vehicle: nickname, vehicle type and model year.",
+          "sql": "SELECT Nickname, VehicleType, ModelYear FROM Vehicle",
+          "types": [
+            "table"
+          ],
+          "hints": [
+            "Three columns, no aggregation needed (one row per vehicle)."
+          ]
+        },
+        {
+          "id": "dv16",
+          "topic": "table",
+          "difficulty": 3,
+          "text": "A table with one row per platform: platform name, total earnings and total tips.",
+          "sql": "SELECT P.PlatformName, SUM(G.Earnings), SUM(G.Tips) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName",
+          "types": [
+            "table"
+          ]
+        },
+        {
+          "id": "dv17",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Monthly total earnings (GigMonth), but only for gigs on {{platform}}.",
+          "sql": "SELECT G.GigMonth, SUM(G.Earnings) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID WHERE P.PlatformName = '{{platform}}' GROUP BY G.GigMonth",
+          "types": [
+            "line",
+            "clusteredColumn"
+          ],
+          "params": {
+            "platform": {
+              "from": "SELECT PlatformName FROM Platform"
+            }
+          },
+          "hints": [
+            "Drop PlatformName into the filters and tick one value."
+          ]
+        },
+        {
+          "id": "dv18",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Total expense amount by category name, counting only expenses tied to {{vehicle}}.",
+          "sql": "SELECT C.CategoryName, SUM(E.Amount) FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID JOIN Vehicle V ON E.VehicleID = V.VehicleID WHERE V.Nickname = '{{vehicle}}' GROUP BY C.CategoryName",
+          "types": [
+            "pie",
+            "donut",
+            "clusteredBar",
+            "clusteredColumn"
+          ],
+          "params": {
+            "vehicle": {
+              "from": "SELECT Nickname FROM Vehicle"
+            }
+          }
+        },
+        {
+          "id": "dv19",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Number of gigs per platform name, counting only gigs of at least {{h}} hours.",
+          "sql": "SELECT P.PlatformName, COUNT(G.GigID) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID WHERE G.Hours >= {{h}} GROUP BY P.PlatformName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "params": {
+            "h": {
+              "values": [
+                3,
+                4,
+                5
+              ]
+            }
+          },
+          "hints": [
+            "A numeric filter is a range: from the threshold up to something huge."
+          ]
+        },
+        {
+          "id": "dv20",
+          "topic": "calc",
+          "difficulty": 3,
+          "text": "Total pay including tips, per platform name. Define a calculated field: Earnings + Tips.",
+          "sql": "SELECT P.PlatformName, SUM(G.Earnings + G.Tips) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "hints": [
+            "Create the field, then sum it on the y-axis."
+          ]
+        },
+        {
+          "id": "dv21",
+          "topic": "calc",
+          "difficulty": 4,
+          "text": "Earnings per hour by vehicle nickname, computed as total earnings divided by total hours: SUM(Earnings) / SUM(Hours).",
+          "sql": "SELECT V.Nickname, SUM(G.Earnings) / SUM(G.Hours) FROM Gig G JOIN Vehicle V ON G.VehicleID = V.VehicleID GROUP BY V.Nickname",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "hints": [
+            "This is an aggregate measure: write the SUMs inside the calculated field."
+          ]
+        },
+        {
+          "id": "dv22",
+          "topic": "calc",
+          "difficulty": 4,
+          "text": "Net pay after commission per platform name: sum of Earnings * (1 - CommissionPct / 100.0).",
+          "sql": "SELECT P.PlatformName, SUM(G.Earnings * (1 - P.CommissionPct / 100.0)) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "hints": [
+            "The expression mixes two tables; the builder joins them for you."
+          ]
+        },
+        {
+          "id": "dv23",
+          "topic": "two-dim",
+          "difficulty": 4,
+          "text": "Total miles per vehicle type, broken down by platform name (one series per platform).",
+          "sql": "SELECT V.VehicleType, P.PlatformName, SUM(G.Miles) FROM Gig G JOIN Vehicle V ON G.VehicleID = V.VehicleID JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY V.VehicleType, P.PlatformName",
+          "types": [
+            "stackedColumn",
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "hints": [
+            "Axis: VehicleType; legend: PlatformName."
+          ]
+        },
+        {
+          "id": "dv24",
+          "topic": "two-dim",
+          "difficulty": 4,
+          "text": "Total expense amount per category name, split by vehicle type.",
+          "sql": "SELECT C.CategoryName, V.VehicleType, SUM(E.Amount) FROM Expense E JOIN ExpenseCategory C ON E.CategoryID = C.CategoryID JOIN Vehicle V ON E.VehicleID = V.VehicleID GROUP BY C.CategoryName, V.VehicleType",
+          "types": [
+            "stackedColumn",
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "dv25",
+          "topic": "sort",
+          "difficulty": 3,
+          "text": "Rank the platforms by total tips, highest first (bar chart, sorted).",
+          "sql": "SELECT P.PlatformName, SUM(G.Tips) FROM Gig G JOIN Platform P ON G.PlatformID = P.PlatformID GROUP BY P.PlatformName ORDER BY 2 DESC",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "orderMatters": true
+        },
+        {
+          "id": "dv26",
+          "topic": "sort",
+          "difficulty": 3,
+          "text": "Vehicles (by nickname) ordered by total expense amount, LOWEST first.",
+          "sql": "SELECT V.Nickname, SUM(E.Amount) FROM Expense E JOIN Vehicle V ON E.VehicleID = V.VehicleID GROUP BY V.Nickname ORDER BY 2 ASC",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "orderMatters": true,
+          "hints": [
+            "Bars default to descending; change the sort."
+          ]
+        }
+      ]
     }
   ]
 }

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import type { Notation } from '../../types/content'
 import type { ERDiagram, ERNode, ERSide } from './erModel'
 import { nid } from './erModel'
+export { autoPlaceAttribute } from '../../lib/erRef'
 
 const ENT_W = 120
 const ENT_H = 44
@@ -19,6 +20,10 @@ interface Props {
   /** 'link' mode: clicking two entities creates a relationship. */
   mode: 'select' | 'link'
   onModeDone: () => void
+  /** Display only: no selection, dragging or linking (panning still works). */
+  readOnly?: boolean
+  /** Size the drawing to its content instead of filling the panel. */
+  fit?: boolean
 }
 
 /** Cardinality symbols at the entity end of a line, per notation. */
@@ -104,7 +109,7 @@ function edgePoint(node: ERNode, tx: number, ty: number): { x: number; y: number
   return { x: node.x + ux * t, y: node.y + uy * t }
 }
 
-export function ERCanvas({ diagram, onChange, selected, onSelect, notation, mode, onModeDone }: Props) {
+export function ERCanvas({ diagram, onChange, selected, onSelect, notation, mode, onModeDone, readOnly, fit }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
   const drag = useRef<{ id: string; dx: number; dy: number } | null>(null)
   const [linkFrom, setLinkFrom] = useState<string | null>(null)
@@ -119,6 +124,7 @@ export function ERCanvas({ diagram, onChange, selected, onSelect, notation, mode
 
   const onNodeDown = (e: React.MouseEvent, n: ERNode) => {
     e.stopPropagation()
+    if (readOnly) return
     if (mode === 'link' && n.kind === 'entity') {
       if (!linkFrom) {
         setLinkFrom(n.id)
@@ -170,8 +176,10 @@ export function ERCanvas({ diagram, onChange, selected, onSelect, notation, mode
     panRef.current = null
   }
   const onBgDown = (e: React.MouseEvent) => {
-    onSelect(null)
-    setLinkFrom(null)
+    if (!readOnly) {
+      onSelect(null)
+      setLinkFrom(null)
+    }
     panRef.current = { sx: e.clientX, sy: e.clientY, ox: pan.x, oy: pan.y }
   }
 
@@ -214,20 +222,35 @@ export function ERCanvas({ diagram, onChange, selected, onSelect, notation, mode
     return n.kind === 'entity' ? t.toUpperCase() : t
   }
 
+  // viewBox to fit content (read-only reference drawings)
+  let viewBox: string | undefined
+  let fitStyle: React.CSSProperties | undefined
+  if (fit && diagram.nodes.length) {
+    const xs = diagram.nodes.map((n) => n.x)
+    const ys = diagram.nodes.map((n) => n.y)
+    const minX = Math.min(...xs) - 90
+    const maxX = Math.max(...xs) + 90
+    const minY = Math.min(...ys) - 60
+    const maxY = Math.max(...ys) + 60
+    viewBox = `${minX} ${minY} ${maxX - minX} ${maxY - minY}`
+    fitStyle = { height: Math.min(520, Math.max(220, ((maxY - minY) / (maxX - minX)) * 800)), minHeight: 0 }
+  }
+
   return (
     <svg
       ref={svgRef}
-      className="er-canvas"
+      className={`er-canvas ${readOnly ? 'readonly' : ''}`}
+      viewBox={viewBox}
       onMouseMove={onMove}
       onMouseUp={onUp}
       onMouseLeave={onUp}
       onMouseDown={onBgDown}
-      style={{ cursor: mode === 'link' ? 'crosshair' : undefined }}
+      style={{ cursor: mode === 'link' ? 'crosshair' : undefined, ...fitStyle }}
     >
       <g transform={`translate(${pan.x},${pan.y})`}>
-        {diagram.nodes.length === 0 && (
+        {diagram.nodes.length === 0 && !readOnly && (
           <text x={30} y={40} className="hint">
-            Add an {notation.er.terms.entity} from the toolbar, then attributes and relationships. Drag to move; drag the background to pan.
+            Add an {notation.er.terms.entity} from the toolbar (or press E), then attributes (A) and relationships (R). Drag to move; drag the background to pan.
           </text>
         )}
         {links}
@@ -279,12 +302,4 @@ export function ERCanvas({ diagram, onChange, selected, onSelect, notation, mode
       </g>
     </svg>
   )
-}
-
-/** Place attributes in a fan around their owner. */
-export function autoPlaceAttribute(owner: ERNode, existing: number): { x: number; y: number } {
-  const angles = [-90, -50, -130, -20, -160, 20, 200, 50, 230, 90]
-  const a = ((angles[existing % angles.length] ?? -90) * Math.PI) / 180
-  const r = existing >= 10 ? 150 : 105
-  return { x: owner.x + Math.cos(a) * r, y: owner.y + Math.sin(a) * r }
 }

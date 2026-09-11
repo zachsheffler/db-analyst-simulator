@@ -1905,7 +1905,7 @@
     {
       "id": "riverbend-sql",
       "company": "riverbend",
-      "title": "Riverbend Cycles \u2014 SQL sprint",
+      "title": "Riverbend Cycles — SQL sprint",
       "database": "riverbend",
       "questions": [
         {
@@ -2267,7 +2267,7 @@
           "text": "For each category name, show the total revenue (sum of LineTotal).",
           "sql": "SELECT C.CategoryName, SUM(S.LineTotal) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID GROUP BY C.CategoryName",
           "hints": [
-            "Three tables: SoldVia \u2192 Product \u2192 Category."
+            "Three tables: SoldVia → Product → Category."
           ]
         },
         {
@@ -2709,6 +2709,142 @@
         }
       },
       "referenceSql": "SELECT P.ProductName, C.CategoryName, SUM(S.LineTotal) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID GROUP BY P.ProductName, C.CategoryName ORDER BY 3 DESC"
+    }
+  ],
+  "vizSprints": [
+    {
+      "id": "riverbend-viz-sprint",
+      "company": "riverbend",
+      "title": "Riverbend Cycles — viz sprint",
+      "database": "riverbend",
+      "questions": [
+        {
+          "id": "rv01",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: total revenue (sum of LineTotal).",
+          "sql": "SELECT SUM(LineTotal) FROM SoldVia",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "rv02",
+          "topic": "single-value",
+          "difficulty": 1,
+          "text": "Show one number: the number of sales transactions.",
+          "sql": "SELECT COUNT(TID) FROM SalesTransaction",
+          "types": [
+            "card"
+          ]
+        },
+        {
+          "id": "rv03",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare revenue (LineTotal) by category name.",
+          "sql": "SELECT C.CategoryName, SUM(S.LineTotal) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID GROUP BY C.CategoryName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "rv04",
+          "topic": "compare",
+          "difficulty": 2,
+          "text": "Compare units sold (Quantity) by vendor name.",
+          "sql": "SELECT V.VendorName, SUM(S.Quantity) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Vendor V ON P.VendorID = V.VendorID GROUP BY V.VendorName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "rv05",
+          "topic": "trend",
+          "difficulty": 2,
+          "text": "Show monthly revenue (LineTotal by TMonth) over time.",
+          "sql": "SELECT T.TMonth, SUM(S.LineTotal) FROM SalesTransaction T JOIN SoldVia S ON T.TID = S.TID GROUP BY T.TMonth",
+          "types": [
+            "line"
+          ]
+        },
+        {
+          "id": "rv06",
+          "topic": "part-whole",
+          "difficulty": 2,
+          "text": "Show each region's share of transactions (count by region name).",
+          "sql": "SELECT R.RegionName, COUNT(T.TID) FROM SalesTransaction T JOIN Store S ON T.StoreID = S.StoreID JOIN Region R ON S.RegionID = R.RegionID GROUP BY R.RegionName",
+          "types": [
+            "pie",
+            "donut",
+            "clusteredBar",
+            "clusteredColumn"
+          ]
+        },
+        {
+          "id": "rv07",
+          "topic": "table",
+          "difficulty": 2,
+          "text": "A table of products: product name and price.",
+          "sql": "SELECT ProductName, Price FROM Product",
+          "types": [
+            "table"
+          ]
+        },
+        {
+          "id": "rv08",
+          "topic": "filter",
+          "difficulty": 3,
+          "text": "Revenue by store name, only for stores in the {{region}} region.",
+          "sql": "SELECT S.StoreName, SUM(SV.LineTotal) FROM SoldVia SV JOIN SalesTransaction T ON SV.TID = T.TID JOIN Store S ON T.StoreID = S.StoreID JOIN Region R ON S.RegionID = R.RegionID WHERE R.RegionName = '{{region}}' GROUP BY S.StoreName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "params": {
+            "region": {
+              "from": "SELECT RegionName FROM Region"
+            }
+          }
+        },
+        {
+          "id": "rv09",
+          "topic": "calc",
+          "difficulty": 3,
+          "text": "Average line value per category name: SUM(LineTotal) / SUM(Quantity).",
+          "sql": "SELECT C.CategoryName, SUM(S.LineTotal) / SUM(S.Quantity) FROM SoldVia S JOIN Product P ON S.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID GROUP BY C.CategoryName",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "rv10",
+          "topic": "two-dim",
+          "difficulty": 4,
+          "text": "Revenue (LineTotal) per category name, split by region name.",
+          "sql": "SELECT C.CategoryName, R.RegionName, SUM(SV.LineTotal) FROM SoldVia SV JOIN Product P ON SV.ProductID = P.ProductID JOIN Category C ON P.CategoryID = C.CategoryID JOIN SalesTransaction T ON SV.TID = T.TID JOIN Store S ON T.StoreID = S.StoreID JOIN Region R ON S.RegionID = R.RegionID GROUP BY C.CategoryName, R.RegionName",
+          "types": [
+            "stackedColumn",
+            "clusteredColumn",
+            "clusteredBar"
+          ]
+        },
+        {
+          "id": "rv11",
+          "topic": "sort",
+          "difficulty": 3,
+          "text": "Stores ranked by revenue (LineTotal), highest first.",
+          "sql": "SELECT S.StoreName, SUM(SV.LineTotal) FROM SoldVia SV JOIN SalesTransaction T ON SV.TID = T.TID JOIN Store S ON T.StoreID = S.StoreID GROUP BY S.StoreName ORDER BY 2 DESC",
+          "types": [
+            "clusteredColumn",
+            "clusteredBar"
+          ],
+          "orderMatters": true
+        }
+      ]
     }
   ]
 }

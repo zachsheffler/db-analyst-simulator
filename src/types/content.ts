@@ -284,9 +284,25 @@ export interface VizFilter {
   values: (string | number)[]
 }
 
+/**
+ * An ad-hoc field the student defines in the visual builder ("New measure",
+ * "Create Calculated Field", mutate()). `expr` is a SQLite expression over
+ * column names (Column, Table.Column, Table[Column] or [Column]).
+ */
+export interface CalcField {
+  name: string
+  expr: string
+  /** Already aggregated (SUM(x)/SUM(y)); otherwise row-level and aggregated by the well. */
+  aggregate: boolean
+  /** Treated as a measure (Σ) when true, as a category when false. */
+  numeric: boolean
+}
+
 export interface VisualSpec {
   type: VisualType
   title?: string
+  /** Calculated fields available in the Fields pane; referenced with table = CALC_TABLE. */
+  calcs?: CalcField[]
   /** Category / axis field. */
   axis?: FieldRef
   /** Legend / series field. */
@@ -323,6 +339,25 @@ export interface PresentationChallenge {
   points?: number
 }
 
+/**
+ * Viz sprint: generated chart questions, graded by comparing the visual's data
+ * with the reference SQL (so any field choice or calculated field that yields
+ * the same numbers is accepted) plus the visual type and, optionally, a title.
+ */
+export interface VizTemplate extends QueryTemplate {
+  /** Acceptable visual types, best first. */
+  types: VisualType[]
+  requireTitle?: boolean
+}
+
+export interface VizSet {
+  id: string
+  company: string
+  title: string
+  database: string
+  questions: VizTemplate[]
+}
+
 // ---------------------------------------------------------------------------
 // Pack
 // ---------------------------------------------------------------------------
@@ -338,4 +373,5 @@ export interface ContentPack {
   design?: DesignChallenge[]
   queries?: QuerySet[]
   presentation?: PresentationChallenge[]
+  vizSprints?: VizSet[]
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useContent } from '../content'
-import { loadProgress, resetProgress, totals } from '../lib/score'
+import { loadProgress, resetProgress, totals, type SprintSession } from '../lib/score'
 import { Stars } from '../components/GradeReport'
 import { notifyProgress } from '../App'
 import { Slot } from '../components/Slots'
@@ -37,7 +37,15 @@ export function ReportCard() {
         </div>
         <div className="card stat">
           <div className="v">{t.queryBest}</div>
-          <div className="l">Best query sprint</div>
+          <div className="l">Best SQL sprint</div>
+        </div>
+        <div className="card stat">
+          <div className="v">{t.vizSprintBest}</div>
+          <div className="l">Best viz sprint</div>
+        </div>
+        <div className="card stat">
+          <div className="v">{t.designSprintBest}</div>
+          <div className="l">Best diagram sprint</div>
         </div>
         <div className="card stat">
           <div className="v">
@@ -128,41 +136,9 @@ export function ReportCard() {
           </div>
         </div>
       </div>
-      <div className="panel" style={{ marginTop: 16 }}>
-        <div className="panel-head">Query sprints</div>
-        <div className="panel-body">
-          {p.query.sessions.length === 0 ? (
-            <span className="muted">No sprints yet.</span>
-          ) : (
-            <table className="data">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Set</th>
-                  <th>Length</th>
-                  <th>Score</th>
-                  <th>Answered</th>
-                  <th>Correct</th>
-                  <th>Best streak</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...p.query.sessions].reverse().map((s, i) => (
-                  <tr key={i}>
-                    <td>{new Date(s.date).toLocaleString()}</td>
-                    <td>{content.queries.find((q) => q.id === s.setId)?.title ?? s.setId}</td>
-                    <td>{Math.round(s.durationSec / 60)} min</td>
-                    <td className="num">{s.score}</td>
-                    <td className="num">{s.answered}</td>
-                    <td className="num">{s.correct}</td>
-                    <td className="num">{s.bestStreak}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
+      <SprintTable title="Query sprints" sessions={p.query.sessions} name={(id) => content.queries.find((q) => q.id === id)?.title ?? id} />
+      <SprintTable title="Viz sprints" sessions={p.vizSprints.sessions} name={(id) => content.vizSprints.find((q) => q.id === id)?.title ?? id} />
+      <SprintTable title="Diagramming sprints" sessions={p.designSprints.sessions} name={(id) => content.companies.find((c) => id.startsWith(c.id))?.name ?? id} />
       <Slot name="help">
         <div className="help-block">
           <h3>Report card</h3>
@@ -170,6 +146,46 @@ export function ReportCard() {
           <p>Export the JSON to hand in; it includes your name, every score, and every sprint.</p>
         </div>
       </Slot>
+    </div>
+  )
+}
+
+function SprintTable({ title, sessions, name }: { title: string; sessions: SprintSession[]; name: (setId: string) => string }) {
+  return (
+    <div className="panel" style={{ marginTop: 16 }}>
+      <div className="panel-head">{title}</div>
+      <div className="panel-body">
+        {sessions.length === 0 ? (
+          <span className="muted">No sprints yet.</span>
+        ) : (
+          <table className="data">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Set</th>
+                <th>Length</th>
+                <th>Score</th>
+                <th>Answered</th>
+                <th>Correct</th>
+                <th>Best streak</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...sessions].reverse().map((s, i) => (
+                <tr key={i}>
+                  <td>{new Date(s.date).toLocaleString()}</td>
+                  <td>{name(s.setId)}</td>
+                  <td>{s.durationSec ? `${Math.round(s.durationSec / 60)} min` : 'practice'}</td>
+                  <td className="num">{s.score}</td>
+                  <td className="num">{s.answered}</td>
+                  <td className="num">{s.correct}</td>
+                  <td className="num">{s.bestStreak}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   )
 }

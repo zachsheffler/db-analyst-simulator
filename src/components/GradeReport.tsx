@@ -2,6 +2,7 @@ import type { Grade } from '../lib/grade'
 
 export function GradeReport({ grade, title }: { grade: Grade; title?: string }) {
   const pct = grade.max ? Math.round((100 * grade.score) / grade.max) : 0
+  const visible = grade.items.filter((it) => !it.hidden)
   return (
     <div className="grade">
       <div className="grade-head">
@@ -15,7 +16,7 @@ export function GradeReport({ grade, title }: { grade: Grade; title?: string }) 
         <span className="muted">{pct}%</span>
       </div>
       <ul>
-        {grade.items.map((it, i) => {
+        {visible.map((it, i) => {
           const cls = it.max === 0 ? (it.level ?? 'info') : it.ok ? 'ok' : 'bad'
           return (
             <li key={i} className={cls}>

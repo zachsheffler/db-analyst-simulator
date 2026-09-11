@@ -8,6 +8,7 @@ import {
   type Notation,
   type PresentationChallenge,
   type QuerySet,
+  type VizSet,
 } from '../types/content'
 import { DEFAULT_NOTATION } from './defaultNotation'
 
@@ -19,6 +20,7 @@ export interface Content {
   design: DesignChallenge[]
   queries: QuerySet[]
   presentation: PresentationChallenge[]
+  vizSprints: VizSet[]
   errors: string[]
 }
 
@@ -84,6 +86,10 @@ export function validatePack(p: unknown): string[] {
   for (const c of pk.presentation ?? []) {
     if (!c.id || !c.company || !c.database || !c.brief || !c.expected?.types?.length) errs.push(`Presentation challenge "${c.id ?? '?'}" needs id, company, database, brief, expected.types[].`)
   }
+  for (const v of pk.vizSprints ?? []) {
+    if (!v.id || !v.company || !v.database || !Array.isArray(v.questions)) errs.push(`Viz sprint set "${v.id ?? '?'}" needs id, company, database, questions[].`)
+    for (const t of v.questions ?? []) if (!t.id || !t.text || !t.sql || !t.types?.length) errs.push(`Viz question "${t.id ?? '?'}" in "${v.id}" needs id, text, sql, types[].`)
+  }
   return errs
 }
 
@@ -94,6 +100,7 @@ export function assemble(packs: ContentPack[], errors: string[] = []): Content {
   const design: DesignChallenge[] = []
   const queries: QuerySet[] = []
   const presentation: PresentationChallenge[] = []
+  const vizSprints: VizSet[] = []
   for (const p of packs) {
     if (p.notation) notation = deepMerge(notation, p.notation)
     for (const c of p.companies ?? []) if (!companies.some((x) => x.id === c.id)) companies.push(c)
@@ -101,14 +108,16 @@ export function assemble(packs: ContentPack[], errors: string[] = []): Content {
     design.push(...(p.design ?? []))
     queries.push(...(p.queries ?? []))
     presentation.push(...(p.presentation ?? []))
+    vizSprints.push(...(p.vizSprints ?? []))
   }
+  for (const v of vizSprints) if (!databases.has(v.database)) errors.push(`Viz sprint set "${v.id}" references unknown database "${v.database}".`)
   for (const q of queries) if (!databases.has(q.database)) errors.push(`Query set "${q.id}" references unknown database "${q.database}".`)
   for (const c of presentation) if (!databases.has(c.database)) errors.push(`Presentation challenge "${c.id}" references unknown database "${c.database}".`)
   const known = new Set(companies.map((c) => c.id))
-  for (const x of [...design, ...queries, ...presentation]) if (!known.has(x.company)) errors.push(`"${x.id}" references unknown company "${x.company}".`)
+  for (const x of [...design, ...queries, ...presentation, ...vizSprints]) if (!known.has(x.company)) errors.push(`"${x.id}" references unknown company "${x.company}".`)
   const order: Record<string, number> = { easy: 0, medium: 1, hard: 2 }
   companies.sort((a, b) => order[a.tier] - order[b.tier])
-  return { packs, notation, companies, databases, design, queries, presentation, errors }
+  return { packs, notation, companies, databases, design, queries, presentation, vizSprints, errors }
 }
 
 /** Load packs listed in public/packs/manifest.json, plus any user-imported packs. */

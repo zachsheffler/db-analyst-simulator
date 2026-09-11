@@ -12,6 +12,7 @@ export function CompanyPicker({ onPick }: { onPick: (c: Company) => void }) {
     design: content.design.filter((c) => c.company === id).length,
     queries: content.queries.filter((q) => q.company === id).reduce((a, q) => a + q.questions.length, 0),
     viz: content.presentation.filter((c) => c.company === id).length,
+    vizSprint: content.vizSprints.filter((v) => v.company === id).reduce((a, v) => a + v.questions.length, 0),
     earned:
       content.design.filter((c) => c.company === id).reduce((a, c) => a + ((p.design[c.id]?.er ?? 0) + (p.design[c.id]?.schema ?? 0) + (p.design[c.id]?.ddl ?? 0)), 0) +
       content.presentation.filter((c) => c.company === id).reduce((a, c) => a + (p.present[c.id]?.score ?? 0), 0),
@@ -36,6 +37,7 @@ export function CompanyPicker({ onPick }: { onPick: (c: Company) => void }) {
                   <span>✏ {n.design} design</span>
                   <span>⚡ {n.queries} query templates</span>
                   <span>📊 {n.viz} viz</span>
+                  <span>🎯 {n.vizSprint} viz sprint templates</span>
                   {n.earned > 0 && <span className="badge good">{n.earned} pts earned</span>}
                 </div>
               </div>
@@ -52,7 +54,7 @@ export function CompanyPicker({ onPick }: { onPick: (c: Company) => void }) {
             database), the <b>Query Workbench</b> (answer questions with SQL against the clock), and <b>Viz</b> (build the chart that answers a business
             question).
           </p>
-          <p>The help panel (here) always shows the brief and reference notes for what you are doing. The panel below the work area holds the timer and controls.</p>
+          <p>The help panel (here) always shows the brief and reference notes for what you are doing. The panel below the work area holds a quick reference (or the sprint timer) and the controls; the professor chat sits beside it. Press <kbd>?</kbd> anywhere for keyboard shortcuts.</p>
         </div>
       </Slot>
     </div>
